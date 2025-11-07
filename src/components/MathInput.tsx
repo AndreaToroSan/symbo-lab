@@ -22,7 +22,7 @@ export const MathInput = ({ value, onChange, onMathFieldReady, placeholder }: Ma
         leftRightIntoCmdGoes: 'up',
         restrictMismatchedBrackets: true,
         sumStartsWithNEquals: true,
-        supSubsRequireOperand: true,
+        supSubsRequireOperand: false,
         charsThatBreakOutOfSupSub: '+-=<>',
         autoSubscriptNumerals: true,
         autoCommands: 'pi theta sqrt sum prod int',
@@ -44,6 +44,8 @@ export const MathInput = ({ value, onChange, onMathFieldReady, placeholder }: Ma
       if (onMathFieldReady) {
         onMathFieldReady(mathField);
       }
+
+      console.log('MathField initialized:', mathField);
     }
   }, []);
 

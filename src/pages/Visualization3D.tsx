@@ -50,8 +50,11 @@ const Visualization3D = () => {
 
   const handleInsertSymbol = (latex: string) => {
     if (mathFieldRef.current) {
-      mathFieldRef.current.cmd(latex);
+      console.log('Inserting symbol:', latex);
+      mathFieldRef.current.write(latex);
       mathFieldRef.current.focus();
+    } else {
+      console.warn('MathField not ready yet');
     }
   };
 
