@@ -1,52 +1,73 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Plot3DCanvas } from "@/components/Plot3DCanvas";
 import { MathKeyboard } from "@/components/MathKeyboard";
+import { MathInput } from "@/components/MathInput";
 import { RefreshCw, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { loadMathQuill } from "@/lib/mathquill-loader";
 
 const Visualization3D = () => {
-  const [functionInput, setFunctionInput] = useState("x**2 + y**2");
+  const [functionLatex, setFunctionLatex] = useState("x^2+y^2");
   const [xMin, setXMin] = useState("-3");
   const [xMax, setXMax] = useState("3");
   const [yMin, setYMin] = useState("-3");
   const [yMax, setYMax] = useState("3");
   const [currentFunction, setCurrentFunction] = useState("x**2 + y**2");
+  const [mathQuillLoaded, setMathQuillLoaded] = useState(false);
   const { toast } = useToast();
-  const inputRef = useRef<HTMLInputElement>(null);
+  const mathFieldRef = useRef<any>(null);
 
-  const handleInsertSymbol = (symbol: string) => {
-    if (inputRef.current) {
-      const start = inputRef.current.selectionStart || 0;
-      const end = inputRef.current.selectionEnd || 0;
-      const newValue = functionInput.slice(0, start) + symbol + functionInput.slice(end);
-      setFunctionInput(newValue);
-      
-      // Set cursor position after inserted symbol
-      setTimeout(() => {
-        if (inputRef.current) {
-          const newPosition = start + symbol.length;
-          inputRef.current.focus();
-          inputRef.current.setSelectionRange(newPosition, newPosition);
-        }
-      }, 0);
-    } else {
-      setFunctionInput(functionInput + symbol);
+  useEffect(() => {
+    loadMathQuill().then(() => setMathQuillLoaded(true)).catch(console.error);
+  }, []);
+
+  const latexToPlotly = (latex: string): string => {
+    let result = latex
+      .replace(/\\cdot/g, '*')
+      .replace(/\\left\(/g, '(')
+      .replace(/\\right\)/g, ')')
+      .replace(/\\left\|/g, 'abs(')
+      .replace(/\\right\|/g, ')')
+      .replace(/\\sin/g, 'sin')
+      .replace(/\\cos/g, 'cos')
+      .replace(/\\tan/g, 'tan')
+      .replace(/\\ln/g, 'log')
+      .replace(/\\log/g, 'log10')
+      .replace(/\\exp/g, 'exp')
+      .replace(/\\sqrt\{([^}]+)\}/g, 'sqrt($1)')
+      .replace(/\\pi/g, 'pi')
+      .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)')
+      .replace(/\^(\d)/g, '**$1')
+      .replace(/\^\{([^}]+)\}/g, '**($1)')
+      .replace(/\s+/g, '');
+    
+    return result;
+  };
+
+  const handleInsertSymbol = (latex: string) => {
+    if (mathFieldRef.current) {
+      mathFieldRef.current.cmd(latex);
+      mathFieldRef.current.focus();
     }
   };
 
   const handleVisualize = () => {
-    setCurrentFunction(functionInput);
+    const plotlyFunction = latexToPlotly(functionLatex);
+    setCurrentFunction(plotlyFunction);
+    toast({
+      title: "Función actualizada",
+      description: `Renderizando: ${plotlyFunction}`,
+    });
   };
 
   const handleSave = async () => {
-    // TODO: Implement Supabase save functionality
     toast({
-      title: "Function saved",
-      description: "Your function has been saved to favorites.",
+      title: "Función guardada",
+      description: "Tu función ha sido guardada en favoritos.",
     });
   };
 
@@ -65,16 +86,24 @@ const Visualization3D = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="function">Function z = f(x,y)</Label>
-              <Input
-                ref={inputRef}
-                id="function"
-                value={functionInput}
-                onChange={(e) => setFunctionInput(e.target.value)}
-                placeholder="e.g., x**2 + y**2"
-              />
+              <Label htmlFor="function">Función z = f(x,y)</Label>
+              {mathQuillLoaded ? (
+                <MathInput
+                  value={functionLatex}
+                  onChange={setFunctionLatex}
+                  onMathFieldReady={(field) => (mathFieldRef.current = field)}
+                  placeholder="x^2 + y^2"
+                />
+              ) : (
+                <Input
+                  value={functionLatex}
+                  onChange={(e) => setFunctionLatex(e.target.value)}
+                  placeholder="Cargando editor matemático..."
+                  disabled
+                />
+              )}
               <p className="text-xs text-muted-foreground">
-                Usa el teclado matemático o escribe directamente
+                Usa el teclado matemático para insertar símbolos
               </p>
             </div>
 

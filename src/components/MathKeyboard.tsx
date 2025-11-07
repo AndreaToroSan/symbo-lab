@@ -3,49 +3,50 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface MathKeyboardProps {
-  onInsert: (symbol: string) => void;
+  onInsert: (latex: string) => void;
 }
 
 export const MathKeyboard = ({ onInsert }: MathKeyboardProps) => {
   const basicSymbols = [
-    { label: "x²", value: "**2" },
-    { label: "xⁿ", value: "**" },
-    { label: "√", value: "sqrt(" },
-    { label: "ⁿ√", value: "root(" },
-    { label: "π", value: "pi" },
+    { label: "x²", value: "^2" },
+    { label: "xⁿ", value: "^{ }" },
+    { label: "√", value: "\\sqrt{ }" },
+    { label: "ⁿ√", value: "\\sqrt[n]{ }" },
+    { label: "π", value: "\\pi" },
     { label: "e", value: "e" },
-    { label: "∞", value: "inf" },
-    { label: "|x|", value: "abs(" },
+    { label: "∞", value: "\\infty" },
+    { label: "|x|", value: "\\left| \\right|" },
+    { label: "x/y", value: "\\frac{ }{ }" },
   ];
 
   const trigSymbols = [
-    { label: "sin", value: "sin(" },
-    { label: "cos", value: "cos(" },
-    { label: "tan", value: "tan(" },
-    { label: "cot", value: "cot(" },
-    { label: "sec", value: "sec(" },
-    { label: "csc", value: "csc(" },
-    { label: "arcsin", value: "arcsin(" },
-    { label: "arccos", value: "arccos(" },
-    { label: "arctan", value: "arctan(" },
+    { label: "sin", value: "\\sin\\left( \\right)" },
+    { label: "cos", value: "\\cos\\left( \\right)" },
+    { label: "tan", value: "\\tan\\left( \\right)" },
+    { label: "cot", value: "\\cot\\left( \\right)" },
+    { label: "sec", value: "\\sec\\left( \\right)" },
+    { label: "csc", value: "\\csc\\left( \\right)" },
+    { label: "arcsin", value: "\\arcsin\\left( \\right)" },
+    { label: "arccos", value: "\\arccos\\left( \\right)" },
+    { label: "arctan", value: "\\arctan\\left( \\right)" },
   ];
 
   const advancedSymbols = [
-    { label: "ln", value: "ln(" },
-    { label: "log", value: "log(" },
-    { label: "exp", value: "exp(" },
-    { label: "sinh", value: "sinh(" },
-    { label: "cosh", value: "cosh(" },
-    { label: "tanh", value: "tanh(" },
-    { label: "(", value: "(" },
-    { label: ")", value: ")" },
+    { label: "ln", value: "\\ln\\left( \\right)" },
+    { label: "log", value: "\\log\\left( \\right)" },
+    { label: "exp", value: "\\exp\\left( \\right)" },
+    { label: "sinh", value: "\\sinh\\left( \\right)" },
+    { label: "cosh", value: "\\cosh\\left( \\right)" },
+    { label: "tanh", value: "\\tanh\\left( \\right)" },
+    { label: "∂/∂x", value: "\\frac{\\partial }{\\partial x}" },
+    { label: "∫", value: "\\int_{ }^{ } " },
   ];
 
   const operators = [
-    { label: "+", value: " + " },
-    { label: "−", value: " - " },
-    { label: "×", value: " * " },
-    { label: "÷", value: " / " },
+    { label: "+", value: "+" },
+    { label: "−", value: "-" },
+    { label: "×", value: "\\cdot" },
+    { label: "÷", value: "/" },
   ];
 
   return (
