@@ -1,0 +1,126 @@
+import { useRef } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { OrbitControls, Grid } from "@react-three/drei";
+import * as THREE from "three";
+
+interface Plot3DCanvasProps {
+  formula: string;
+  xRange: [number, number];
+  yRange: [number, number];
+  resolution?: number;
+}
+
+function Surface({ formula, xRange, yRange, resolution = 50 }: Plot3DCanvasProps) {
+  const meshRef = useRef<THREE.Mesh>(null);
+
+  // Create surface geometry
+  const geometry = new THREE.BufferGeometry();
+  const vertices: number[] = [];
+  const indices: number[] = [];
+  const colors: number[] = [];
+
+  const [xMin, xMax] = xRange;
+  const [yMin, yMax] = yRange;
+  const xStep = (xMax - xMin) / resolution;
+  const yStep = (yMax - yMin) / resolution;
+
+  // Function parser (simplified - in production use math.js or similar)
+  const evaluateZ = (x: number, y: number): number => {
+    try {
+      // Simple evaluation - replace with proper parser in production
+      const func = formula
+        .replace(/\^/g, "**")
+        .replace(/x/g, `(${x})`)
+        .replace(/y/g, `(${y})`);
+      return eval(func);
+    } catch {
+      return 0;
+    }
+  };
+
+  let minZ = Infinity;
+  let maxZ = -Infinity;
+
+  // Generate vertices
+  for (let i = 0; i <= resolution; i++) {
+    for (let j = 0; j <= resolution; j++) {
+      const x = xMin + i * xStep;
+      const y = yMin + j * yStep;
+      const z = evaluateZ(x, y);
+      
+      vertices.push(x, y, z);
+      minZ = Math.min(minZ, z);
+      maxZ = Math.max(maxZ, z);
+    }
+  }
+
+  // Generate colors based on height
+  for (let i = 0; i < vertices.length; i += 3) {
+    const z = vertices[i + 2];
+    const normalized = (z - minZ) / (maxZ - minZ || 1);
+    
+    // Blue to red gradient
+    colors.push(normalized, 0.3, 1 - normalized);
+  }
+
+  // Generate indices for triangles
+  for (let i = 0; i < resolution; i++) {
+    for (let j = 0; j < resolution; j++) {
+      const a = i * (resolution + 1) + j;
+      const b = a + 1;
+      const c = a + (resolution + 1);
+      const d = c + 1;
+
+      indices.push(a, b, c);
+      indices.push(b, d, c);
+    }
+  }
+
+  geometry.setIndex(indices);
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+  geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+  geometry.computeVertexNormals();
+
+  useFrame(() => {
+    if (meshRef.current) {
+      meshRef.current.rotation.z += 0.001;
+    }
+  });
+
+  return (
+    <mesh ref={meshRef} geometry={geometry}>
+      <meshPhongMaterial vertexColors side={THREE.DoubleSide} />
+    </mesh>
+  );
+}
+
+export const Plot3DCanvas = (props: Plot3DCanvasProps) => {
+  return (
+    <div className="w-full h-[500px] bg-card rounded-lg overflow-hidden border">
+      <Canvas camera={{ position: [8, 8, 8], fov: 50 }}>
+        <ambientLight intensity={0.5} />
+        <pointLight position={[10, 10, 10]} intensity={1} />
+        <pointLight position={[-10, -10, -10]} intensity={0.5} />
+        
+        <Surface {...props} />
+        
+        <Grid
+          args={[20, 20]}
+          cellSize={1}
+          cellThickness={0.5}
+          cellColor="#6366f1"
+          sectionSize={5}
+          sectionThickness={1}
+          sectionColor="#818cf8"
+          fadeDistance={30}
+          fadeStrength={1}
+          followCamera={false}
+        />
+        
+        <OrbitControls enableDamping dampingFactor={0.05} />
+        
+        <axesHelper args={[5]} />
+      </Canvas>
+    </div>
+  );
+};
