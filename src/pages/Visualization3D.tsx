@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Plot3DCanvas } from "@/components/Plot3DCanvas";
+import { MathKeyboard } from "@/components/MathKeyboard";
 import { RefreshCw, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -15,6 +16,27 @@ const Visualization3D = () => {
   const [yMax, setYMax] = useState("3");
   const [currentFunction, setCurrentFunction] = useState("x**2 + y**2");
   const { toast } = useToast();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleInsertSymbol = (symbol: string) => {
+    if (inputRef.current) {
+      const start = inputRef.current.selectionStart || 0;
+      const end = inputRef.current.selectionEnd || 0;
+      const newValue = functionInput.slice(0, start) + symbol + functionInput.slice(end);
+      setFunctionInput(newValue);
+      
+      // Set cursor position after inserted symbol
+      setTimeout(() => {
+        if (inputRef.current) {
+          const newPosition = start + symbol.length;
+          inputRef.current.focus();
+          inputRef.current.setSelectionRange(newPosition, newPosition);
+        }
+      }, 0);
+    } else {
+      setFunctionInput(functionInput + symbol);
+    }
+  };
 
   const handleVisualize = () => {
     setCurrentFunction(functionInput);
@@ -45,15 +67,18 @@ const Visualization3D = () => {
             <div className="space-y-2">
               <Label htmlFor="function">Function z = f(x,y)</Label>
               <Input
+                ref={inputRef}
                 id="function"
                 value={functionInput}
                 onChange={(e) => setFunctionInput(e.target.value)}
                 placeholder="e.g., x**2 + y**2"
               />
               <p className="text-xs text-muted-foreground">
-                Use ** for powers, e.g., x**2 for x²
+                Usa el teclado matemático o escribe directamente
               </p>
             </div>
+
+            <MathKeyboard onInsert={handleInsertSymbol} />
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
