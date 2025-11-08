@@ -1,16 +1,53 @@
 import { useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Grid } from "@react-three/drei";
+import { OrbitControls, Grid, Line } from "@react-three/drei";
 import * as THREE from "three";
+
+type VisualizationType = "surface" | "parametric" | "contour" | "vector-field" | "implicit";
 
 interface Plot3DCanvasProps {
   formula: string;
   xRange: [number, number];
   yRange: [number, number];
+  tRange?: [number, number];
   resolution?: number;
+  visualizationType?: VisualizationType;
 }
 
-function Surface({ formula, xRange, yRange, resolution = 50 }: Plot3DCanvasProps) {
+function ParametricCurve({ formula, tRange = [0, 6.28], resolution = 100 }: { formula: string; tRange?: [number, number]; resolution?: number }) {
+  const [xFunc, yFunc, zFunc] = formula.split("|");
+  const points: THREE.Vector3[] = [];
+
+  const evaluateParam = (func: string, t: number): number => {
+    try {
+      const f = func.replace(/t/g, `(${t})`).replace(/\^/g, "**");
+      return eval(f);
+    } catch {
+      return 0;
+    }
+  };
+
+  const [tMin, tMax] = tRange;
+  const tStep = (tMax - tMin) / resolution;
+
+  for (let i = 0; i <= resolution; i++) {
+    const t = tMin + i * tStep;
+    const x = evaluateParam(xFunc, t);
+    const y = evaluateParam(yFunc, t);
+    const z = evaluateParam(zFunc, t);
+    points.push(new THREE.Vector3(x, y, z));
+  }
+
+  return (
+    <Line
+      points={points}
+      color="#ff0066"
+      lineWidth={3}
+    />
+  );
+}
+
+function Surface({ formula, xRange, yRange, resolution = 50, visualizationType = "surface" }: Plot3DCanvasProps) {
   const meshRef = useRef<THREE.Mesh>(null);
 
   // Create surface geometry
@@ -95,6 +132,8 @@ function Surface({ formula, xRange, yRange, resolution = 50 }: Plot3DCanvasProps
 }
 
 export const Plot3DCanvas = (props: Plot3DCanvasProps) => {
+  const { visualizationType = "surface" } = props;
+
   return (
     <div className="w-full h-[500px] bg-card rounded-lg overflow-hidden border">
       <Canvas camera={{ position: [8, 8, 8], fov: 50 }}>
@@ -102,7 +141,11 @@ export const Plot3DCanvas = (props: Plot3DCanvasProps) => {
         <pointLight position={[10, 10, 10]} intensity={1} />
         <pointLight position={[-10, -10, -10]} intensity={0.5} />
         
-        <Surface {...props} />
+        {visualizationType === "parametric" ? (
+          <ParametricCurve formula={props.formula} tRange={props.tRange} />
+        ) : (
+          <Surface {...props} />
+        )}
         
         <Grid
           args={[20, 20]}

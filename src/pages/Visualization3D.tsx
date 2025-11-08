@@ -3,21 +3,34 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plot3DCanvas } from "@/components/Plot3DCanvas";
 import { MathKeyboard } from "@/components/MathKeyboard";
 import { MathInput, MathInputRef } from "@/components/MathInput";
 import { RefreshCw, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+type VisualizationType = "surface" | "parametric" | "contour" | "vector-field" | "implicit";
+
 const Visualization3D = () => {
+  const [visualizationType, setVisualizationType] = useState<VisualizationType>("surface");
   const [functionLatex, setFunctionLatex] = useState("");
+  const [xLatex, setXLatex] = useState("");
+  const [yLatex, setYLatex] = useState("");
+  const [zLatex, setZLatex] = useState("");
   const [xMin, setXMin] = useState("-3");
   const [xMax, setXMax] = useState("3");
   const [yMin, setYMin] = useState("-3");
   const [yMax, setYMax] = useState("3");
+  const [tMin, setTMin] = useState("0");
+  const [tMax, setTMax] = useState("6.28");
   const [currentFunction, setCurrentFunction] = useState("x**2 + y**2");
+  const [currentType, setCurrentType] = useState<VisualizationType>("surface");
   const { toast } = useToast();
   const mathInputRef = useRef<MathInputRef>(null);
+  const xInputRef = useRef<MathInputRef>(null);
+  const yInputRef = useRef<MathInputRef>(null);
+  const zInputRef = useRef<MathInputRef>(null);
 
   const latexToPlotly = (latex: string): string => {
     let result = latex
@@ -43,17 +56,29 @@ const Visualization3D = () => {
   };
 
   const handleInsertSymbol = (latex: string) => {
-    if (mathInputRef.current) {
+    if (visualizationType === "parametric") {
+      if (xInputRef.current) xInputRef.current.write(latex);
+    } else if (mathInputRef.current) {
       mathInputRef.current.write(latex);
     }
   };
 
   const handleVisualize = () => {
-    const plotlyFunction = latexToPlotly(functionLatex);
-    setCurrentFunction(plotlyFunction);
+    if (visualizationType === "parametric") {
+      const xFunc = latexToPlotly(xLatex);
+      const yFunc = latexToPlotly(yLatex);
+      const zFunc = latexToPlotly(zLatex);
+      setCurrentFunction(`${xFunc}|${yFunc}|${zFunc}`);
+      setCurrentType("parametric");
+    } else {
+      const plotlyFunction = latexToPlotly(functionLatex);
+      setCurrentFunction(plotlyFunction);
+      setCurrentType(visualizationType);
+    }
+    
     toast({
-      title: "Función actualizada",
-      description: `Renderizando: ${plotlyFunction}`,
+      title: "Visualización actualizada",
+      description: `Tipo: ${visualizationType}`,
     });
   };
 
@@ -68,74 +93,180 @@ const Visualization3D = () => {
     <div className="container mx-auto p-6 space-y-6">
       <div>
         <h1 className="text-4xl font-bold mb-2 text-foreground">3D Visualization</h1>
-        <p className="text-muted-foreground">Visualize functions of two variables z = f(x, y)</p>
+        <p className="text-muted-foreground">Visualización avanzada de funciones multivariables</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle>Function Input</CardTitle>
-            <CardDescription>Enter your function and ranges</CardDescription>
+            <CardDescription>Selecciona el tipo de visualización</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="function">Función z = f(x,y)</Label>
-              <MathInput
-                ref={mathInputRef}
-                value={functionLatex}
-                onChange={setFunctionLatex}
-              />
+              <Label>Tipo de Visualización</Label>
+              <Select value={visualizationType} onValueChange={(value) => setVisualizationType(value as VisualizationType)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="surface">Superficie z = f(x,y)</SelectItem>
+                  <SelectItem value="parametric">Curva Paramétrica 3D</SelectItem>
+                  <SelectItem value="contour">Curvas de Nivel</SelectItem>
+                  <SelectItem value="vector-field">Campo Vectorial</SelectItem>
+                  <SelectItem value="implicit">Superficie Implícita F(x,y,z)=0</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+
+            {visualizationType === "surface" && (
+              <div className="space-y-2">
+                <Label>Función z = f(x,y)</Label>
+                <MathInput
+                  ref={mathInputRef}
+                  value={functionLatex}
+                  onChange={setFunctionLatex}
+                  placeholder="x^2 + y^2"
+                />
+              </div>
+            )}
+
+            {visualizationType === "parametric" && (
+              <div className="space-y-2">
+                <Label>x(t)</Label>
+                <MathInput
+                  ref={xInputRef}
+                  value={xLatex}
+                  onChange={setXLatex}
+                  placeholder="\cos(t)"
+                />
+                <Label>y(t)</Label>
+                <MathInput
+                  ref={yInputRef}
+                  value={yLatex}
+                  onChange={setYLatex}
+                  placeholder="\sin(t)"
+                />
+                <Label>z(t)</Label>
+                <MathInput
+                  ref={zInputRef}
+                  value={zLatex}
+                  onChange={setZLatex}
+                  placeholder="t"
+                />
+              </div>
+            )}
+
+            {visualizationType === "contour" && (
+              <div className="space-y-2">
+                <Label>Función z = f(x,y)</Label>
+                <MathInput
+                  ref={mathInputRef}
+                  value={functionLatex}
+                  onChange={setFunctionLatex}
+                  placeholder="x^2 + y^2"
+                />
+              </div>
+            )}
+
+            {visualizationType === "vector-field" && (
+              <div className="space-y-2">
+                <Label>Vector Field F(x,y)</Label>
+                <MathInput
+                  ref={mathInputRef}
+                  value={functionLatex}
+                  onChange={setFunctionLatex}
+                  placeholder="(-y, x)"
+                />
+              </div>
+            )}
+
+            {visualizationType === "implicit" && (
+              <div className="space-y-2">
+                <Label>Ecuación F(x,y,z) = 0</Label>
+                <MathInput
+                  ref={mathInputRef}
+                  value={functionLatex}
+                  onChange={setFunctionLatex}
+                  placeholder="x^2 + y^2 + z^2 - 1"
+                />
+              </div>
+            )}
 
             <MathKeyboard onInsert={handleInsertSymbol} />
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="xMin">x min</Label>
-                <Input
-                  id="xMin"
-                  type="number"
-                  value={xMin}
-                  onChange={(e) => setXMin(e.target.value)}
-                  placeholder="-3"
-                />
+            {visualizationType === "parametric" ? (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="tMin">t min</Label>
+                  <Input
+                    id="tMin"
+                    type="number"
+                    value={tMin}
+                    onChange={(e) => setTMin(e.target.value)}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tMax">t max</Label>
+                  <Input
+                    id="tMax"
+                    type="number"
+                    value={tMax}
+                    onChange={(e) => setTMax(e.target.value)}
+                    placeholder="6.28"
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="xMax">x max</Label>
-                <Input
-                  id="xMax"
-                  type="number"
-                  value={xMax}
-                  onChange={(e) => setXMax(e.target.value)}
-                  placeholder="3"
-                />
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="xMin">x min</Label>
+                  <Input
+                    id="xMin"
+                    type="number"
+                    value={xMin}
+                    onChange={(e) => setXMin(e.target.value)}
+                    placeholder="-3"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="xMax">x max</Label>
+                  <Input
+                    id="xMax"
+                    type="number"
+                    value={xMax}
+                    onChange={(e) => setXMax(e.target.value)}
+                    placeholder="3"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="yMin">y min</Label>
+                  <Input
+                    id="yMin"
+                    type="number"
+                    value={yMin}
+                    onChange={(e) => setYMin(e.target.value)}
+                    placeholder="-3"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="yMax">y max</Label>
+                  <Input
+                    id="yMax"
+                    type="number"
+                    value={yMax}
+                    onChange={(e) => setYMax(e.target.value)}
+                    placeholder="3"
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="yMin">y min</Label>
-                <Input
-                  id="yMin"
-                  type="number"
-                  value={yMin}
-                  onChange={(e) => setYMin(e.target.value)}
-                  placeholder="-3"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="yMax">y max</Label>
-                <Input
-                  id="yMax"
-                  type="number"
-                  value={yMax}
-                  onChange={(e) => setYMax(e.target.value)}
-                  placeholder="3"
-                />
-              </div>
-            </div>
+            )}
 
             <div className="flex gap-2">
               <Button onClick={handleVisualize} className="flex-1">
                 <RefreshCw className="mr-2 h-4 w-4" />
-                Visualize
+                Visualizar
               </Button>
               <Button onClick={handleSave} variant="outline">
                 <Save className="h-4 w-4" />
@@ -154,6 +285,8 @@ const Visualization3D = () => {
               formula={currentFunction}
               xRange={[parseFloat(xMin), parseFloat(xMax)]}
               yRange={[parseFloat(yMin), parseFloat(yMax)]}
+              tRange={[parseFloat(tMin), parseFloat(tMax)]}
+              visualizationType={currentType}
             />
             <p className="text-xs text-muted-foreground mt-4 text-center">
               Click and drag to rotate • Scroll to zoom • Right-click to pan
