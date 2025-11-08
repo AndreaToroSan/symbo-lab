@@ -10,7 +10,7 @@ import { RefreshCw, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Visualization3D = () => {
-  const [functionLatex, setFunctionLatex] = useState("x^2+y^2");
+  const [functionLatex, setFunctionLatex] = useState("");
   const [xMin, setXMin] = useState("-3");
   const [xMax, setXMax] = useState("3");
   const [yMin, setYMin] = useState("-3");

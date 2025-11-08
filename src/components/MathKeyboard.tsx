@@ -16,8 +16,8 @@ export const MathKeyboard = ({ onInsert }: MathKeyboardProps) => {
   const pages = [
     // Página 1: Operaciones básicas y potencias
     [
-      { label: "x²", value: "^{ }" },
-      { label: "xⁿ", value: "^{ }" },
+      { label: "x²", value: "{ }^2" },
+      { label: "xⁿ", value: "{ }^{ }" },
       { label: "√", value: "\\sqrt{ }" },
       { label: "ⁿ√", value: "\\sqrt[ ]{ }" },
       { label: "x/y", value: "\\frac{ }{ }" },
