@@ -1,21 +1,24 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { MathDisplay } from "@/components/MathDisplay";
+import { MathInput, MathInputRef } from "@/components/MathInput";
+import { MathKeyboard } from "@/components/MathKeyboard";
 import { Calculator } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const Optimization = () => {
-  const [functionInput, setFunctionInput] = useState("x^2 + y^2 - 2*x - 4*y");
-  const [constraint, setConstraint] = useState("");
+  const [functionInput, setFunctionInput] = useState("x^2+y^2-2x-4y");
+  const [constraint, setConstraint] = useState("x+y-1");
   const [useConstraint, setUseConstraint] = useState(false);
   const [criticalPoints, setCriticalPoints] = useState<string | null>(null);
   const [classification, setClassification] = useState<string | null>(null);
   const [lagrangeResult, setLagrangeResult] = useState<any>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const mathInputRef = useRef<MathInputRef>(null);
+  const constraintInputRef = useRef<MathInputRef>(null);
   const { toast } = useToast();
 
   const handleCalculate = async () => {
@@ -90,13 +93,15 @@ const Optimization = () => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="function">Function f(x,y)</Label>
-              <Input
-                id="function"
+              <MathInput
+                ref={mathInputRef}
                 value={functionInput}
-                onChange={(e) => setFunctionInput(e.target.value)}
+                onChange={setFunctionInput}
                 placeholder="e.g., x^2 + y^2 - 2*x - 4*y"
               />
             </div>
+
+            <MathKeyboard onInsert={(latex) => mathInputRef.current?.write(latex)} />
 
             <div className="flex items-center space-x-2">
               <input
@@ -110,15 +115,18 @@ const Optimization = () => {
             </div>
 
             {useConstraint && (
-              <div className="space-y-2">
-                <Label htmlFor="constraint">Constraint g(x,y) = 0</Label>
-                <Input
-                  id="constraint"
-                  value={constraint}
-                  onChange={(e) => setConstraint(e.target.value)}
-                  placeholder="e.g., x + y - 1"
-                />
-              </div>
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="constraint">Constraint g(x,y) = 0</Label>
+                  <MathInput
+                    ref={constraintInputRef}
+                    value={constraint}
+                    onChange={setConstraint}
+                    placeholder="e.g., x + y - 1"
+                  />
+                </div>
+                <MathKeyboard onInsert={(latex) => constraintInputRef.current?.write(latex)} />
+              </>
             )}
 
             <Button onClick={handleCalculate} disabled={isCalculating} className="w-full">

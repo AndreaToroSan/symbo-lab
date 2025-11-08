@@ -1,20 +1,23 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { MathDisplay } from "@/components/MathDisplay";
+import { MathInput, MathInputRef } from "@/components/MathInput";
+import { MathKeyboard } from "@/components/MathKeyboard";
 import { Calculator } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const DomainLimits = () => {
-  const [functionInput, setFunctionInput] = useState("sqrt(4 - x^2 - y^2)");
+  const [functionInput, setFunctionInput] = useState("\\sqrt{4-x^2-y^2}");
   const [point, setPoint] = useState("(0,0)");
   const [domain, setDomain] = useState<string | null>(null);
   const [range, setRange] = useState<string | null>(null);
   const [limit, setLimit] = useState<any>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const mathInputRef = useRef<MathInputRef>(null);
   const { toast } = useToast();
 
   const handleCalculateDomain = async () => {
@@ -155,13 +158,15 @@ const DomainLimits = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="function-domain">Function f(x,y)</Label>
-                <Input
-                  id="function-domain"
+                <MathInput
+                  ref={mathInputRef}
                   value={functionInput}
-                  onChange={(e) => setFunctionInput(e.target.value)}
+                  onChange={setFunctionInput}
                   placeholder="e.g., sqrt(4 - x^2 - y^2)"
                 />
               </div>
+
+              <MathKeyboard onInsert={(latex) => mathInputRef.current?.write(latex)} />
 
               <Button onClick={handleCalculateDomain} disabled={isCalculating} className="w-full">
                 <Calculator className="mr-2 h-4 w-4" />
@@ -176,15 +181,9 @@ const DomainLimits = () => {
               <CardDescription>Find the range of a function</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="function-range">Function f(x,y)</Label>
-                <Input
-                  id="function-range"
-                  value={functionInput}
-                  onChange={(e) => setFunctionInput(e.target.value)}
-                  placeholder="e.g., x^2 + y^2"
-                />
-              </div>
+              <p className="text-sm text-muted-foreground">
+                Uses the same function as Domain Analysis
+              </p>
 
               <Button onClick={handleCalculateRange} disabled={isCalculating} className="w-full">
                 <Calculator className="mr-2 h-4 w-4" />
@@ -199,15 +198,9 @@ const DomainLimits = () => {
               <CardDescription>Calculate limit at a point</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="function-limit">Function f(x,y)</Label>
-                <Input
-                  id="function-limit"
-                  value={functionInput}
-                  onChange={(e) => setFunctionInput(e.target.value)}
-                  placeholder="e.g., (x*y)/(x^2 + y^2)"
-                />
-              </div>
+              <p className="text-sm text-muted-foreground">
+                Uses the same function as Domain Analysis
+              </p>
 
               <div className="space-y-2">
                 <Label htmlFor="point">Point (x,y)</Label>

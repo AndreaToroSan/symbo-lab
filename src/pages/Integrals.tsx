@@ -1,16 +1,18 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MathDisplay } from "@/components/MathDisplay";
+import { MathInput, MathInputRef } from "@/components/MathInput";
+import { MathKeyboard } from "@/components/MathKeyboard";
 import { Calculator } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const Integrals = () => {
-  const [functionInput, setFunctionInput] = useState("x^2 + y^2");
+  const [functionInput, setFunctionInput] = useState("x^2+y^2");
   const [integralType, setIntegralType] = useState<"double" | "triple">("double");
   const [xMin, setXMin] = useState("-1");
   const [xMax, setXMax] = useState("1");
@@ -21,6 +23,7 @@ const Integrals = () => {
   const [result, setResult] = useState<string | null>(null);
   const [setup, setSetup] = useState<string | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const mathInputRef = useRef<MathInputRef>(null);
   const { toast } = useToast();
 
   const handleCalculate = async () => {
@@ -87,13 +90,15 @@ const Integrals = () => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="function">Function f(x,y) or f(x,y,z)</Label>
-              <Input
-                id="function"
+              <MathInput
+                ref={mathInputRef}
                 value={functionInput}
-                onChange={(e) => setFunctionInput(e.target.value)}
+                onChange={setFunctionInput}
                 placeholder="e.g., x^2 + y^2"
               />
             </div>
+
+            <MathKeyboard onInsert={(latex) => mathInputRef.current?.write(latex)} />
 
             <div className="space-y-2">
               <Label htmlFor="integralType">Integral Type</Label>

@@ -1,22 +1,25 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MathDisplay } from "@/components/MathDisplay";
+import { MathInput, MathInputRef } from "@/components/MathInput";
+import { MathKeyboard } from "@/components/MathKeyboard";
 import { Calculator } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const Derivatives = () => {
-  const [functionInput, setFunctionInput] = useState("x^2 * y + y^3");
+  const [functionInput, setFunctionInput] = useState("x^2y+y^3");
   const [variable, setVariable] = useState("x");
   const [pointX, setPointX] = useState("1");
   const [pointY, setPointY] = useState("2");
   const [result, setResult] = useState<string | null>(null);
   const [gradient, setGradient] = useState<any>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const mathInputRef = useRef<MathInputRef>(null);
   const { toast } = useToast();
 
   const handleCalculate = async () => {
@@ -118,13 +121,15 @@ const Derivatives = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="function">Function f(x,y)</Label>
-                <Input
-                  id="function"
+                <MathInput
+                  ref={mathInputRef}
                   value={functionInput}
-                  onChange={(e) => setFunctionInput(e.target.value)}
+                  onChange={setFunctionInput}
                   placeholder="e.g., x^2 * y + y^3"
                 />
               </div>
+
+              <MathKeyboard onInsert={(latex) => mathInputRef.current?.write(latex)} />
 
               <div className="space-y-2">
                 <Label htmlFor="variable">Differentiate with respect to</Label>
@@ -152,15 +157,9 @@ const Derivatives = () => {
               <CardDescription>Calculate ∇f at a specific point</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="function-gradient">Function f(x,y)</Label>
-                <Input
-                  id="function-gradient"
-                  value={functionInput}
-                  onChange={(e) => setFunctionInput(e.target.value)}
-                  placeholder="e.g., x^2 * y + y^3"
-                />
-              </div>
+              <p className="text-sm text-muted-foreground">
+                Uses the same function as Partial Derivatives
+              </p>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
