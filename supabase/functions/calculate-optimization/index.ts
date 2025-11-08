@@ -11,30 +11,50 @@ serve(async (req) => {
   }
 
   try {
-    const { functionText } = await req.json();
-    console.log('Calculating optimization:', { functionText });
+    const { operation, functionText, constraint } = await req.json();
+    console.log('Calculating optimization:', { operation, functionText, constraint });
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `Eres un experto en cálculo multivariable y optimización. Tu tarea es encontrar puntos críticos y clasificarlos.
+    let systemPrompt, userPrompt;
 
-Debes responder ÚNICAMENTE con un objeto JSON con este formato exacto:
+    if (operation === 'lagrange') {
+      systemPrompt = `Eres un experto en cálculo multivariable y optimización con restricciones usando Multiplicadores de Lagrange. Responde ÚNICAMENTE con un objeto JSON con este formato exacto:
+
 {
-  "criticalPoints": "expresión LaTeX con los puntos críticos",
-  "classification": "expresión LaTeX con la clasificación de cada punto"
+  "system": "expresión LaTeX del sistema de ecuaciones de Lagrange: \\nabla f = \\lambda \\nabla g y g = 0",
+  "points": "expresión LaTeX de los puntos críticos encontrados",
+  "values": "expresión LaTeX de los valores de f en cada punto crítico (para identificar máximos y mínimos)"
 }
 
 Reglas:
-1. Encuentra todos los puntos críticos igualando las derivadas parciales a cero
-2. Clasifica cada punto usando el criterio de la segunda derivada (Hessiano)
-3. Usa notación LaTeX estándar
-4. Si no hay puntos críticos, indica: \\text{No hay puntos críticos}
+1. Plantea el sistema ∇f = λ∇g y g(x,y) = 0
+2. Resuelve el sistema para encontrar los puntos críticos
+3. Evalúa f en cada punto para determinar cuál es máximo y mínimo
+4. Usa notación LaTeX estándar
 5. Responde SOLO con el JSON, sin texto adicional`;
 
-    const userPrompt = `Encuentra y clasifica los puntos críticos de: ${functionText}`;
+      userPrompt = `Optimiza ${functionText} sujeto a la restricción ${constraint} = 0 usando Multiplicadores de Lagrange`;
+    } else {
+      systemPrompt = `Eres un experto en cálculo multivariable y optimización. Tu tarea es encontrar y clasificar puntos críticos de funciones multivariables. Responde ÚNICAMENTE con un objeto JSON con este formato exacto:
+
+{
+  "criticalPoints": "expresión LaTeX de los puntos críticos, ej: (1, 2), (0, 0)",
+  "classification": "expresión LaTeX con la clasificación usando el criterio de la segunda derivada (Hessiano), ej: \\text{Mínimo local en } (1, 2) \\text{ y punto silla en } (0, 0)"
+}
+
+Reglas:
+1. Calcula las derivadas parciales y encuentra donde ambas son cero
+2. Evalúa el Hessiano (matriz de segundas derivadas) en cada punto crítico
+3. Clasifica cada punto: mínimo local (D>0, fxx>0), máximo local (D>0, fxx<0), punto silla (D<0), o indeterminado (D=0)
+4. Usa notación LaTeX estándar
+5. Responde SOLO con el JSON, sin texto adicional`;
+
+      userPrompt = `Encuentra y clasifica los puntos críticos de: ${functionText}`;
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

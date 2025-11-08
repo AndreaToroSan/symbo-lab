@@ -12,7 +12,7 @@ serve(async (req) => {
 
   try {
     const { operation, functionText, point } = await req.json();
-    console.log('Calculating domain/limit:', { operation, functionText, point });
+    console.log('Calculating domain/limit/range:', { operation, functionText, point });
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -32,6 +32,17 @@ Reglas:
 5. Si la función está definida en todo R², indica: D = \\mathbb{R}^2`;
 
       userPrompt = `Determina el dominio de: ${functionText}`;
+    } else if (operation === "range") {
+      systemPrompt = `Eres un experto en cálculo multivariable. Tu tarea es determinar el rango de funciones multivariables y responder SOLAMENTE con la expresión matemática en formato LaTeX.
+
+Reglas:
+1. Responde SOLO con la expresión del rango en LaTeX
+2. Usa notación de intervalos o conjuntos: [a, b], (a, \\infty), \\mathbb{R}, etc.
+3. Analiza valores máximos, mínimos y comportamiento asintótico
+4. Simplifica la expresión cuando sea posible
+5. Si el rango es todo R, indica: R = \\mathbb{R}`;
+
+      userPrompt = `Determina el rango de: ${functionText}`;
     } else {
       systemPrompt = `Eres un experto en cálculo multivariable. Tu tarea es calcular límites de funciones multivariables y responder con un objeto JSON.
 
@@ -87,7 +98,7 @@ Reglas:
     const content = data.choices[0].message.content.trim();
     
     let result;
-    if (operation === "domain") {
+    if (operation === "domain" || operation === "range") {
       result = { result: content };
     } else {
       try {

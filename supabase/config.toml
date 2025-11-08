@@ -12,8 +12,5 @@ verify_jwt = false
 [functions.calculate-domain-limits]
 verify_jwt = false
 
-[functions.calculate-lines-planes]
-verify_jwt = false
-
 [functions.classify-quadric-surface]
 verify_jwt = false

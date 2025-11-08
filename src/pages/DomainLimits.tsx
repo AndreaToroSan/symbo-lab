@@ -9,11 +9,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const DomainLimits = () => {
-  const [functionInput, setFunctionInput] = useState("1/(x^2 + y^2 - 1)");
-  const [point, setPoint] = useState("(0, 0)");
+  const [functionInput, setFunctionInput] = useState("sqrt(4 - x^2 - y^2)");
+  const [point, setPoint] = useState("(0,0)");
   const [domain, setDomain] = useState<string | null>(null);
-  const [limit, setLimit] = useState<string | null>(null);
-  const [limitNote, setLimitNote] = useState<string | null>(null);
+  const [range, setRange] = useState<string | null>(null);
+  const [limit, setLimit] = useState<any>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const { toast } = useToast();
 
@@ -23,8 +23,8 @@ const DomainLimits = () => {
     try {
       const { data, error } = await supabase.functions.invoke('calculate-domain-limits', {
         body: { 
-          operation: "domain",
-          functionText: functionInput
+          operation: 'domain',
+          functionText: functionInput 
         }
       });
 
@@ -36,7 +36,7 @@ const DomainLimits = () => {
           description: data.error,
           variant: "destructive"
         });
-        setDomain("\\text{Error al calcular dominio}");
+        setDomain("\\text{Error al calcular}");
       } else {
         setDomain(data.result);
         toast({
@@ -57,15 +57,14 @@ const DomainLimits = () => {
     }
   };
 
-  const handleCalculateLimit = async () => {
+  const handleCalculateRange = async () => {
     setIsCalculating(true);
     
     try {
       const { data, error } = await supabase.functions.invoke('calculate-domain-limits', {
         body: { 
-          operation: "limit",
-          functionText: functionInput,
-          point: point
+          operation: 'range',
+          functionText: functionInput 
         }
       });
 
@@ -77,12 +76,50 @@ const DomainLimits = () => {
           description: data.error,
           variant: "destructive"
         });
-        setLimit("\\text{Error al calcular límite}");
-        setLimitNote(null);
+        setRange("\\text{Error al calcular}");
       } else {
-        const exists = data.exists ? "\\text{Existe}" : "\\text{No existe}";
-        setLimit(`${exists}: ${data.result}`);
-        setLimitNote(data.note || null);
+        setRange(data.result);
+        toast({
+          title: "Cálculo completado",
+          description: "Rango calculado exitosamente"
+        });
+      }
+    } catch (error) {
+      console.error("Calculation error:", error);
+      toast({
+        title: "Error",
+        description: "Error al calcular el rango",
+        variant: "destructive"
+      });
+      setRange("\\text{Error al calcular rango}");
+    } finally {
+      setIsCalculating(false);
+    }
+  };
+
+  const handleCalculateLimit = async () => {
+    setIsCalculating(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('calculate-domain-limits', {
+        body: { 
+          operation: 'limit',
+          functionText: functionInput,
+          point: point 
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.error) {
+        toast({
+          title: "Error",
+          description: data.error,
+          variant: "destructive"
+        });
+        setLimit(null);
+      } else {
+        setLimit(data);
         toast({
           title: "Cálculo completado",
           description: "Límite calculado exitosamente"
@@ -95,8 +132,7 @@ const DomainLimits = () => {
         description: "Error al calcular el límite",
         variant: "destructive"
       });
-      setLimit("\\text{Error al calcular límite}");
-      setLimitNote(null);
+      setLimit(null);
     } finally {
       setIsCalculating(false);
     }
@@ -105,8 +141,8 @@ const DomainLimits = () => {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-4xl font-bold mb-2 text-foreground">Domain & Limits</h1>
-        <p className="text-muted-foreground">Analyze function domains and calculate multivariable limits</p>
+        <h1 className="text-4xl font-bold mb-2 text-foreground">Domain, Range & Limits</h1>
+        <p className="text-muted-foreground">Analyze domain, range and calculate limits of multivariable functions</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -114,22 +150,45 @@ const DomainLimits = () => {
           <Card>
             <CardHeader>
               <CardTitle>Domain Analysis</CardTitle>
-              <CardDescription>Find the domain of a multivariable function</CardDescription>
+              <CardDescription>Find the domain of a function</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="domainFunction">Function f(x,y)</Label>
+                <Label htmlFor="function-domain">Function f(x,y)</Label>
                 <Input
-                  id="domainFunction"
+                  id="function-domain"
                   value={functionInput}
                   onChange={(e) => setFunctionInput(e.target.value)}
-                  placeholder="e.g., 1/(x^2 + y^2 - 1)"
+                  placeholder="e.g., sqrt(4 - x^2 - y^2)"
                 />
               </div>
 
               <Button onClick={handleCalculateDomain} disabled={isCalculating} className="w-full">
                 <Calculator className="mr-2 h-4 w-4" />
-                {isCalculating ? "Calculating..." : "Find Domain"}
+                {isCalculating ? "Calculating..." : "Calculate Domain"}
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Range Analysis</CardTitle>
+              <CardDescription>Find the range of a function</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="function-range">Function f(x,y)</Label>
+                <Input
+                  id="function-range"
+                  value={functionInput}
+                  onChange={(e) => setFunctionInput(e.target.value)}
+                  placeholder="e.g., x^2 + y^2"
+                />
+              </div>
+
+              <Button onClick={handleCalculateRange} disabled={isCalculating} className="w-full">
+                <Calculator className="mr-2 h-4 w-4" />
+                {isCalculating ? "Calculating..." : "Calculate Range"}
               </Button>
             </CardContent>
           </Card>
@@ -141,9 +200,9 @@ const DomainLimits = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="limitFunction">Function f(x,y)</Label>
+                <Label htmlFor="function-limit">Function f(x,y)</Label>
                 <Input
-                  id="limitFunction"
+                  id="function-limit"
                   value={functionInput}
                   onChange={(e) => setFunctionInput(e.target.value)}
                   placeholder="e.g., (x*y)/(x^2 + y^2)"
@@ -151,12 +210,12 @@ const DomainLimits = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="point">Point (x₀, y₀)</Label>
+                <Label htmlFor="point">Point (x,y)</Label>
                 <Input
                   id="point"
                   value={point}
                   onChange={(e) => setPoint(e.target.value)}
-                  placeholder="e.g., (0, 0)"
+                  placeholder="e.g., (0,0)"
                 />
               </div>
 
@@ -172,7 +231,7 @@ const DomainLimits = () => {
           {domain && (
             <Card>
               <CardHeader>
-                <CardTitle>Domain Result</CardTitle>
+                <CardTitle>Domain</CardTitle>
               </CardHeader>
               <CardContent>
                 <MathDisplay math={domain} />
@@ -180,21 +239,44 @@ const DomainLimits = () => {
             </Card>
           )}
 
+          {range && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Range</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <MathDisplay math={range} />
+              </CardContent>
+            </Card>
+          )}
+
           {limit && (
             <Card>
               <CardHeader>
-                <CardTitle>Resultado del Límite</CardTitle>
+                <CardTitle>Limit</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <MathDisplay math={limit} />
-                {limitNote && (
-                  <p className="text-sm text-muted-foreground">{limitNote}</p>
+              <CardContent>
+                {limit.exists ? (
+                  <div className="space-y-2">
+                    <MathDisplay math={limit.result} />
+                    {limit.note && (
+                      <p className="text-sm text-muted-foreground">{limit.note}</p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-destructive">Limit does not exist</p>
+                    <MathDisplay math={limit.result} />
+                    {limit.note && (
+                      <p className="text-sm text-muted-foreground">{limit.note}</p>
+                    )}
+                  </div>
                 )}
               </CardContent>
             </Card>
           )}
 
-          {!domain && !limit && (
+          {!domain && !range && !limit && (
             <Card>
               <CardHeader>
                 <CardTitle>Results</CardTitle>
@@ -202,7 +284,7 @@ const DomainLimits = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground text-center py-8">
-                  Calculate domain or limits to see results
+                  Calculate domain, range or limit to see results
                 </p>
               </CardContent>
             </Card>

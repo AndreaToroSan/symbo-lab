@@ -10,17 +10,32 @@ import { useToast } from "@/hooks/use-toast";
 
 const Optimization = () => {
   const [functionInput, setFunctionInput] = useState("x^2 + y^2 - 2*x - 4*y");
+  const [constraint, setConstraint] = useState("");
+  const [useConstraint, setUseConstraint] = useState(false);
   const [criticalPoints, setCriticalPoints] = useState<string | null>(null);
   const [classification, setClassification] = useState<string | null>(null);
+  const [lagrangeResult, setLagrangeResult] = useState<any>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const { toast } = useToast();
 
   const handleCalculate = async () => {
     setIsCalculating(true);
+    setCriticalPoints(null);
+    setClassification(null);
+    setLagrangeResult(null);
     
     try {
+      const body: any = { 
+        functionText: functionInput,
+        operation: useConstraint ? 'lagrange' : 'unconstrained'
+      };
+      
+      if (useConstraint && constraint) {
+        body.constraint = constraint;
+      }
+
       const { data, error } = await supabase.functions.invoke('calculate-optimization', {
-        body: { functionText: functionInput }
+        body
       });
 
       if (error) throw error;
@@ -31,25 +46,29 @@ const Optimization = () => {
           description: data.error,
           variant: "destructive"
         });
-        setCriticalPoints("\\text{Error al calcular}");
-        setClassification("");
       } else {
-        setCriticalPoints(data.criticalPoints);
-        setClassification(data.classification);
-        toast({
-          title: "Cálculo completado",
-          description: "Puntos críticos encontrados exitosamente"
-        });
+        if (useConstraint) {
+          setLagrangeResult(data);
+          toast({
+            title: "Cálculo completado",
+            description: "Optimización con restricciones completada"
+          });
+        } else {
+          setCriticalPoints(data.criticalPoints);
+          setClassification(data.classification);
+          toast({
+            title: "Cálculo completado",
+            description: "Puntos críticos encontrados exitosamente"
+          });
+        }
       }
     } catch (error) {
       console.error("Calculation error:", error);
       toast({
         title: "Error",
-        description: "Error al encontrar puntos críticos",
+        description: "Error al optimizar",
         variant: "destructive"
       });
-      setCriticalPoints("\\text{Error al encontrar puntos críticos}");
-      setClassification("");
     } finally {
       setIsCalculating(false);
     }
@@ -59,7 +78,7 @@ const Optimization = () => {
     <div className="container mx-auto p-6 space-y-6">
       <div>
         <h1 className="text-4xl font-bold mb-2 text-foreground">Optimization</h1>
-        <p className="text-muted-foreground">Find critical points, maxima, and minima</p>
+        <p className="text-muted-foreground">Find critical points and optimize with constraints using Lagrange Multipliers</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -79,9 +98,32 @@ const Optimization = () => {
               />
             </div>
 
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="use-constraint"
+                checked={useConstraint}
+                onChange={(e) => setUseConstraint(e.target.checked)}
+                className="rounded"
+              />
+              <Label htmlFor="use-constraint">Use constraint (Lagrange Multipliers)</Label>
+            </div>
+
+            {useConstraint && (
+              <div className="space-y-2">
+                <Label htmlFor="constraint">Constraint g(x,y) = 0</Label>
+                <Input
+                  id="constraint"
+                  value={constraint}
+                  onChange={(e) => setConstraint(e.target.value)}
+                  placeholder="e.g., x + y - 1"
+                />
+              </div>
+            )}
+
             <Button onClick={handleCalculate} disabled={isCalculating} className="w-full">
               <Calculator className="mr-2 h-4 w-4" />
-              {isCalculating ? "Calculating..." : "Find Critical Points"}
+              {isCalculating ? "Calculating..." : useConstraint ? "Optimize with Constraint" : "Find Critical Points"}
             </Button>
           </CardContent>
         </Card>
@@ -109,7 +151,38 @@ const Optimization = () => {
             </Card>
           )}
 
-          {!criticalPoints && !classification && (
+          {lagrangeResult && (
+            <>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Lagrange System</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <MathDisplay math={lagrangeResult.system} />
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Critical Points with Constraint</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <MathDisplay math={lagrangeResult.points} />
+                </CardContent>
+              </Card>
+              {lagrangeResult.values && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Function Values</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <MathDisplay math={lagrangeResult.values} />
+                  </CardContent>
+                </Card>
+              )}
+            </>
+          )}
+
+          {!criticalPoints && !classification && !lagrangeResult && (
             <Card>
               <CardHeader>
                 <CardTitle>Results</CardTitle>

@@ -1,4 +1,4 @@
-import { Moon, Sun, Box, TrendingUp, Target, Sigma, MapPin, Plane, Shapes } from "lucide-react";
+import { Moon, Sun, Box, TrendingUp, Target, Sigma, MapPin, Shapes } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
@@ -17,12 +17,11 @@ import {
 
 const menuItems = [
   { title: "3D Visualization", url: "/3d-visualization", icon: Box },
-  { title: "Lines & Planes 3D", url: "/lines-planes-3d", icon: Plane },
-  { title: "Quadric Surfaces", url: "/quadric-surfaces", icon: Shapes },
-  { title: "Derivatives", url: "/derivatives", icon: TrendingUp },
+  { title: "Domain & Range", url: "/domain-limits", icon: MapPin },
+  { title: "Derivatives & Gradients", url: "/derivatives", icon: TrendingUp },
   { title: "Optimization", url: "/optimization", icon: Target },
   { title: "Integrals", url: "/integrals", icon: Sigma },
-  { title: "Domain & Limits", url: "/domain-limits", icon: MapPin },
+  { title: "Quadric Surfaces", url: "/quadric-surfaces", icon: Shapes },
 ];
 
 export function AppSidebar() {

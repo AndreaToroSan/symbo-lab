@@ -11,27 +11,47 @@ serve(async (req) => {
   }
 
   try {
-    const { functionText, variable } = await req.json();
-    console.log('Calculating derivative:', { functionText, variable });
+    const { operation, functionText, variable, point } = await req.json();
+    console.log('Calculating derivative/gradient:', { operation, functionText, variable, point });
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `Eres un experto en cálculo multivariable. Tu tarea es calcular derivadas parciales y responder SOLAMENTE con la expresión matemática en formato LaTeX, sin explicaciones adicionales.
+    let systemPrompt, userPrompt;
+
+    if (operation === 'gradient') {
+      systemPrompt = `Eres un experto en cálculo multivariable. Tu tarea es calcular el gradiente de una función en un punto específico y responder con un objeto JSON.
+
+Debes responder ÚNICAMENTE con un objeto JSON con este formato exacto:
+{
+  "vector": "expresión LaTeX del gradiente como vector, ej: \\nabla f(${point.x}, ${point.y}) = \\langle valor_x, valor_y \\rangle",
+  "magnitude": "expresión LaTeX de la magnitud ||\\nabla f|| = valor",
+  "direction": "expresión LaTeX del vector unitario normalizado"
+}
 
 Reglas:
-1. Responde SOLO con la expresión en LaTeX
-2. NO incluyas explicaciones, pasos ni texto adicional
-3. Usa notación estándar de LaTeX (\\frac, \\partial, etc.)
-4. Simplifica la expresión final
-5. Si la función es inválida, responde: \\text{Error: función inválida}`;
+1. Calcula las derivadas parciales ∂f/∂x y ∂f/∂y
+2. Evalúa ambas en el punto dado
+3. Calcula la magnitud del gradiente
+4. Normaliza el vector para obtener la dirección
+5. Usa notación LaTeX estándar
+6. Responde SOLO con el JSON, sin texto adicional`;
 
-    const userPrompt = `Calcula la derivada parcial de la función: ${functionText}
-Con respecto a la variable: ${variable}
+      userPrompt = `Calcula el gradiente de ${functionText} en el punto (${point.x}, ${point.y})`;
+    } else {
+      systemPrompt = `Eres un experto en cálculo multivariable. Tu tarea es calcular derivadas parciales de funciones multivariables y responder SOLAMENTE con la expresión derivada en formato LaTeX.
 
-Responde SOLO con la expresión matemática en LaTeX.`;
+Reglas:
+1. Calcula la derivada parcial correctamente
+2. Simplifica el resultado lo más posible
+3. Responde SOLO con la expresión en LaTeX, sin explicaciones adicionales
+4. Usa notación matemática estándar de LaTeX
+5. No incluyas el símbolo de derivada parcial en tu respuesta, solo el resultado`;
+
+      userPrompt = `Calcula la derivada parcial de ${functionText} con respecto a ${variable}`;
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -65,12 +85,28 @@ Responde SOLO con la expresión matemática en LaTeX.`;
     }
 
     const data = await response.json();
-    const result = data.choices[0].message.content.trim();
+    const content = data.choices[0].message.content.trim();
     
-    console.log('Derivative result:', result);
+    let result;
+    if (operation === 'gradient') {
+      try {
+        const cleanContent = content.replace(/```json\n?|\n?```/g, '');
+        result = JSON.parse(cleanContent);
+      } catch (e) {
+        result = {
+          vector: "\\text{Error procesando gradiente}",
+          magnitude: "\\text{Error}",
+          direction: "\\text{Error}"
+        };
+      }
+    } else {
+      result = { result: content };
+    }
+    
+    console.log('Derivative/Gradient result:', result);
 
     return new Response(
-      JSON.stringify({ result }),
+      JSON.stringify(result),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
 
