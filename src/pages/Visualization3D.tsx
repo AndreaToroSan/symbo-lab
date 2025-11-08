@@ -84,7 +84,6 @@ const Visualization3D = () => {
                 ref={mathInputRef}
                 value={functionLatex}
                 onChange={setFunctionLatex}
-                placeholder="x^2 + y^2"
               />
             </div>
 

@@ -21,6 +21,8 @@ export const MathInput = forwardRef<MathInputRef, MathInputProps>(
       write: (latex: string) => {
         if (mathFieldRef.current) {
           mathFieldRef.current.write(latex);
+          // Move cursor into the first empty box
+          mathFieldRef.current.keystroke('Left');
           mathFieldRef.current.focus();
         }
       },
@@ -86,9 +88,6 @@ export const MathInput = forwardRef<MathInputRef, MathInputProps>(
           ref={spanRef}
           className="mathquill-editable border border-input rounded-md bg-background p-3 min-h-[42px] block overflow-x-auto"
         />
-        <p className="text-xs text-muted-foreground">
-          {placeholder || "Usa el teclado matemático o escribe directamente"}
-        </p>
       </div>
     );
   }
