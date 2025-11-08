@@ -1,69 +1,76 @@
-import { useEffect, useRef } from "react";
-import "mathquill/build/mathquill.css";
-
-// @ts-ignore
-const MQ = window.MathQuill?.getInterface(2);
+import { useEffect, useRef, useState } from "react";
+import "katex/dist/katex.min.css";
+import katex from "katex";
 
 interface MathInputProps {
   value: string;
   onChange: (latex: string) => void;
-  onMathFieldReady?: (field: any) => void;
   placeholder?: string;
 }
 
-export const MathInput = ({ value, onChange, onMathFieldReady, placeholder }: MathInputProps) => {
-  const spanRef = useRef<HTMLSpanElement>(null);
-  const mathFieldRef = useRef<any>(null);
+export const MathInput = ({ value, onChange, placeholder }: MathInputProps) => {
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const displayRef = useRef<HTMLDivElement>(null);
+  const [cursorPosition, setCursorPosition] = useState(0);
 
   useEffect(() => {
-    if (spanRef.current && MQ && !mathFieldRef.current) {
-      const mathField = MQ.MathField(spanRef.current, {
-        spaceBehavesLikeTab: true,
-        leftRightIntoCmdGoes: 'up',
-        restrictMismatchedBrackets: true,
-        sumStartsWithNEquals: true,
-        supSubsRequireOperand: false,
-        charsThatBreakOutOfSupSub: '+-=<>',
-        autoSubscriptNumerals: true,
-        autoCommands: 'pi theta sqrt sum prod int',
-        autoOperatorNames: 'sin cos tan arcsin arccos arctan sinh cosh tanh ln log exp abs',
-        handlers: {
-          edit: function() {
-            const latex = mathField.latex();
-            onChange(latex);
-          }
-        }
-      });
-
-      mathFieldRef.current = mathField;
-      
-      if (value) {
-        mathField.latex(value);
+    if (displayRef.current) {
+      try {
+        katex.render(value || placeholder || "", displayRef.current, {
+          displayMode: false,
+          throwOnError: false,
+          strict: false,
+        });
+      } catch (error) {
+        console.error("KaTeX rendering error:", error);
       }
-
-      if (onMathFieldReady) {
-        onMathFieldReady(mathField);
-      }
-
-      console.log('MathField initialized:', mathField);
     }
+  }, [value, placeholder]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onChange(e.target.value);
+    setCursorPosition(e.target.selectionStart || 0);
+  };
+
+  const insertAtCursor = (text: string) => {
+    if (inputRef.current) {
+      const start = inputRef.current.selectionStart || 0;
+      const end = inputRef.current.selectionEnd || 0;
+      const newValue = value.slice(0, start) + text + value.slice(end);
+      onChange(newValue);
+      
+      setTimeout(() => {
+        if (inputRef.current) {
+          const newPos = start + text.length;
+          inputRef.current.focus();
+          inputRef.current.setSelectionRange(newPos, newPos);
+          setCursorPosition(newPos);
+        }
+      }, 0);
+    }
+  };
+
+  // Expose insert function via ref
+  useEffect(() => {
+    (inputRef.current as any)?.setAttribute('data-insert', 'ready');
   }, []);
 
-  useEffect(() => {
-    if (mathFieldRef.current && value !== mathFieldRef.current.latex()) {
-      mathFieldRef.current.latex(value);
-    }
-  }, [value]);
-
   return (
-    <div className="border border-input rounded-md bg-background">
-      <span 
-        ref={spanRef}
-        className="mathquill-editor p-3 block min-h-[42px] text-base"
-        style={{ fontSize: '16px' }}
-      >
-        {!MQ && placeholder}
-      </span>
+    <div className="space-y-2">
+      <div 
+        ref={displayRef}
+        className="border border-input rounded-md bg-muted/30 p-3 min-h-[42px] overflow-x-auto"
+      />
+      <textarea
+        ref={inputRef}
+        value={value}
+        onChange={handleChange}
+        onClick={(e) => setCursorPosition(e.currentTarget.selectionStart)}
+        onKeyUp={(e) => setCursorPosition(e.currentTarget.selectionStart)}
+        placeholder={placeholder}
+        className="w-full border border-input rounded-md bg-background p-2 text-sm font-mono resize-none"
+        rows={2}
+      />
     </div>
   );
 };

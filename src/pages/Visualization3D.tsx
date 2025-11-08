@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,6 @@ import { MathKeyboard } from "@/components/MathKeyboard";
 import { MathInput } from "@/components/MathInput";
 import { RefreshCw, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { loadMathQuill } from "@/lib/mathquill-loader";
 
 const Visualization3D = () => {
   const [functionLatex, setFunctionLatex] = useState("x^2+y^2");
@@ -17,13 +16,8 @@ const Visualization3D = () => {
   const [yMin, setYMin] = useState("-3");
   const [yMax, setYMax] = useState("3");
   const [currentFunction, setCurrentFunction] = useState("x**2 + y**2");
-  const [mathQuillLoaded, setMathQuillLoaded] = useState(false);
   const { toast } = useToast();
-  const mathFieldRef = useRef<any>(null);
-
-  useEffect(() => {
-    loadMathQuill().then(() => setMathQuillLoaded(true)).catch(console.error);
-  }, []);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const latexToPlotly = (latex: string): string => {
     let result = latex
@@ -49,12 +43,18 @@ const Visualization3D = () => {
   };
 
   const handleInsertSymbol = (latex: string) => {
-    if (mathFieldRef.current) {
-      console.log('Inserting symbol:', latex);
-      mathFieldRef.current.write(latex);
-      mathFieldRef.current.focus();
-    } else {
-      console.warn('MathField not ready yet');
+    const textarea = document.querySelector('textarea');
+    if (textarea) {
+      const start = textarea.selectionStart || 0;
+      const end = textarea.selectionEnd || 0;
+      const newValue = functionLatex.slice(0, start) + latex + functionLatex.slice(end);
+      setFunctionLatex(newValue);
+      
+      setTimeout(() => {
+        const newPos = start + latex.length;
+        textarea.focus();
+        textarea.setSelectionRange(newPos, newPos);
+      }, 0);
     }
   };
 
@@ -90,23 +90,13 @@ const Visualization3D = () => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="function">Función z = f(x,y)</Label>
-              {mathQuillLoaded ? (
-                <MathInput
-                  value={functionLatex}
-                  onChange={setFunctionLatex}
-                  onMathFieldReady={(field) => (mathFieldRef.current = field)}
-                  placeholder="x^2 + y^2"
-                />
-              ) : (
-                <Input
-                  value={functionLatex}
-                  onChange={(e) => setFunctionLatex(e.target.value)}
-                  placeholder="Cargando editor matemático..."
-                  disabled
-                />
-              )}
+              <MathInput
+                value={functionLatex}
+                onChange={setFunctionLatex}
+                placeholder="x^2 + y^2"
+              />
               <p className="text-xs text-muted-foreground">
-                Usa el teclado matemático para insertar símbolos
+                Vista previa arriba • Edita el LaTeX abajo • Usa el teclado matemático
               </p>
             </div>
 
