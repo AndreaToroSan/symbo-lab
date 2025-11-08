@@ -2,8 +2,9 @@ import { useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Grid, Line } from "@react-three/drei";
 import * as THREE from "three";
+import { QuadricSurface3D } from "./QuadricSurface3D";
 
-type VisualizationType = "surface" | "parametric" | "contour" | "vector-field" | "implicit";
+type VisualizationType = "surface" | "parametric" | "contour" | "vector-field" | "implicit" | "quadric";
 
 interface Plot3DCanvasProps {
   formula: string;
@@ -143,6 +144,14 @@ export const Plot3DCanvas = (props: Plot3DCanvasProps) => {
         
         {visualizationType === "parametric" ? (
           <ParametricCurve formula={props.formula} tRange={props.tRange} />
+        ) : visualizationType === "quadric" ? (
+          <QuadricSurface3D 
+            formula={props.formula}
+            xRange={props.xRange}
+            yRange={props.yRange}
+            resolution={props.resolution}
+            showBothSides={true}
+          />
         ) : (
           <Surface {...props} />
         )}

@@ -99,18 +99,38 @@ const QuadricSurfaces = () => {
   const getVisualizationFormula = (): string => {
     if (!classification) return "x**2 + y**2";
     
-    const type = classification.type.toLowerCase();
-    if (type.includes("elipsoide")) {
-      return "(x**2 + y**2 + (z**2)*0.5)**0.5";
-    } else if (type.includes("hiperboloide de una hoja")) {
-      return "(x**2 + y**2 - z**2 + 1)**0.5";
-    } else if (type.includes("paraboloide elíptico")) {
-      return "x**2 + y**2";
-    } else if (type.includes("paraboloide hiperbólico") || type.includes("silla")) {
-      return "x**2 - y**2";
-    } else if (type.includes("cono")) {
-      return "(x**2 + y**2)**0.5";
+    const { type, parameters } = classification;
+    const typeL = type.toLowerCase();
+    
+    // Use actual parameters if available
+    const a = parameters.a || 2;
+    const b = parameters.b || 3;
+    const c = parameters.c || 1;
+    
+    if (typeL.includes("elipsoide")) {
+      // Ellipsoid: solve for z from (x²/a²) + (y²/b²) + (z²/c²) = 1
+      // z² = c²(1 - x²/a² - y²/b²)
+      return `(${c}**2 * (1 - (x**2)/(${a}**2) - (y**2)/(${b}**2)))**0.5`;
+    } else if (typeL.includes("hiperboloide de una hoja")) {
+      // Hyperboloid of one sheet: (x²/a²) + (y²/b²) - (z²/c²) = 1
+      return `(${c}**2 * ((x**2)/(${a}**2) + (y**2)/(${b}**2) - 1))**0.5`;
+    } else if (typeL.includes("hiperboloide de dos hojas")) {
+      // Hyperboloid of two sheets
+      return `(${c}**2 * ((x**2)/(${a}**2) - (y**2)/(${b}**2) - 1))**0.5`;
+    } else if (typeL.includes("paraboloide elíptico")) {
+      // Elliptic paraboloid: z = x²/a² + y²/b²
+      return `(x**2)/(${a}**2) + (y**2)/(${b}**2)`;
+    } else if (typeL.includes("paraboloide hiperbólico") || typeL.includes("silla")) {
+      // Hyperbolic paraboloid: z = x²/a² - y²/b²
+      return `(x**2)/(${a}**2) - (y**2)/(${b}**2)`;
+    } else if (typeL.includes("cono")) {
+      // Cone: z² = x²/a² + y²/b²
+      return `((x**2)/(${a}**2) + (y**2)/(${b}**2))**0.5`;
+    } else if (typeL.includes("cilindro")) {
+      // Cylinder: x²/a² + y²/b² = 1
+      return `(${c} * ((x**2)/(${a}**2) + (y**2)/(${b}**2)))**0.5`;
     }
+    
     return "x**2 + y**2";
   };
 
@@ -230,7 +250,9 @@ const QuadricSurfaces = () => {
 
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Descripción</h3>
-                    <MathDisplay math={classification.description} displayMode={false} />
+                    <div className="text-muted-foreground prose prose-sm max-w-none">
+                      <MathDisplay math={classification.description} displayMode={false} />
+                    </div>
                   </div>
 
                   {classification.center && (
@@ -265,7 +287,8 @@ const QuadricSurfaces = () => {
                 formula={getVisualizationFormula()}
                 xRange={[-3, 3]}
                 yRange={[-3, 3]}
-                visualizationType="surface"
+                visualizationType="quadric"
+                resolution={60}
               />
               <p className="text-xs text-muted-foreground mt-4 text-center">
                 Arrastra para rotar • Rueda para zoom
