@@ -1,11 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Plot3DCanvas } from "@/components/Plot3DCanvas";
 import { MathKeyboard } from "@/components/MathKeyboard";
-import { MathInput } from "@/components/MathInput";
+import { MathInput, MathInputRef } from "@/components/MathInput";
 import { RefreshCw, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,7 +17,7 @@ const Visualization3D = () => {
   const [yMax, setYMax] = useState("3");
   const [currentFunction, setCurrentFunction] = useState("x**2 + y**2");
   const { toast } = useToast();
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const mathInputRef = useRef<MathInputRef>(null);
 
   const latexToPlotly = (latex: string): string => {
     let result = latex
@@ -43,18 +43,8 @@ const Visualization3D = () => {
   };
 
   const handleInsertSymbol = (latex: string) => {
-    const textarea = document.querySelector('textarea');
-    if (textarea) {
-      const start = textarea.selectionStart || 0;
-      const end = textarea.selectionEnd || 0;
-      const newValue = functionLatex.slice(0, start) + latex + functionLatex.slice(end);
-      setFunctionLatex(newValue);
-      
-      setTimeout(() => {
-        const newPos = start + latex.length;
-        textarea.focus();
-        textarea.setSelectionRange(newPos, newPos);
-      }, 0);
+    if (mathInputRef.current) {
+      mathInputRef.current.write(latex);
     }
   };
 
@@ -91,13 +81,11 @@ const Visualization3D = () => {
             <div className="space-y-2">
               <Label htmlFor="function">Función z = f(x,y)</Label>
               <MathInput
+                ref={mathInputRef}
                 value={functionLatex}
                 onChange={setFunctionLatex}
                 placeholder="x^2 + y^2"
               />
-              <p className="text-xs text-muted-foreground">
-                Vista previa arriba • Edita el LaTeX abajo • Usa el teclado matemático
-              </p>
             </div>
 
             <MathKeyboard onInsert={handleInsertSymbol} />

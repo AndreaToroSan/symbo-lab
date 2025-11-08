@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import "katex/dist/katex.min.css";
-import katex from "katex";
+import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
+import { loadMathQuill } from "@/lib/mathquill-loader";
 
 interface MathInputProps {
   value: string;
@@ -8,69 +7,89 @@ interface MathInputProps {
   placeholder?: string;
 }
 
-export const MathInput = ({ value, onChange, placeholder }: MathInputProps) => {
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-  const displayRef = useRef<HTMLDivElement>(null);
-  const [cursorPosition, setCursorPosition] = useState(0);
+export interface MathInputRef {
+  write: (latex: string) => void;
+  focus: () => void;
+}
 
-  useEffect(() => {
-    if (displayRef.current) {
-      try {
-        katex.render(value || placeholder || "", displayRef.current, {
-          displayMode: false,
-          throwOnError: false,
-          strict: false,
-        });
-      } catch (error) {
-        console.error("KaTeX rendering error:", error);
-      }
-    }
-  }, [value, placeholder]);
+export const MathInput = forwardRef<MathInputRef, MathInputProps>(
+  ({ value, onChange, placeholder }, ref) => {
+    const mathFieldRef = useRef<any>(null);
+    const spanRef = useRef<HTMLSpanElement>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onChange(e.target.value);
-    setCursorPosition(e.target.selectionStart || 0);
-  };
-
-  const insertAtCursor = (text: string) => {
-    if (inputRef.current) {
-      const start = inputRef.current.selectionStart || 0;
-      const end = inputRef.current.selectionEnd || 0;
-      const newValue = value.slice(0, start) + text + value.slice(end);
-      onChange(newValue);
-      
-      setTimeout(() => {
-        if (inputRef.current) {
-          const newPos = start + text.length;
-          inputRef.current.focus();
-          inputRef.current.setSelectionRange(newPos, newPos);
-          setCursorPosition(newPos);
+    useImperativeHandle(ref, () => ({
+      write: (latex: string) => {
+        if (mathFieldRef.current) {
+          mathFieldRef.current.write(latex);
+          mathFieldRef.current.focus();
         }
-      }, 0);
-    }
-  };
+      },
+      focus: () => {
+        if (mathFieldRef.current) {
+          mathFieldRef.current.focus();
+        }
+      },
+    }));
 
-  // Expose insert function via ref
-  useEffect(() => {
-    (inputRef.current as any)?.setAttribute('data-insert', 'ready');
-  }, []);
+    useEffect(() => {
+      let mounted = true;
 
-  return (
-    <div className="space-y-2">
-      <div 
-        ref={displayRef}
-        className="border border-input rounded-md bg-muted/30 p-3 min-h-[42px] overflow-x-auto"
-      />
-      <textarea
-        ref={inputRef}
-        value={value}
-        onChange={handleChange}
-        onClick={(e) => setCursorPosition(e.currentTarget.selectionStart)}
-        onKeyUp={(e) => setCursorPosition(e.currentTarget.selectionStart)}
-        placeholder={placeholder}
-        className="w-full border border-input rounded-md bg-background p-2 text-sm font-mono resize-none"
-        rows={2}
-      />
-    </div>
-  );
-};
+      const initMathQuill = async () => {
+        try {
+          await loadMathQuill();
+          
+          if (!mounted || !spanRef.current) return;
+
+          const MQ = (window as any).MathQuill.getInterface(2);
+          
+          const mathField = MQ.MathField(spanRef.current, {
+            spaceBehavesLikeTab: true,
+            leftRightIntoCmdGoes: 'up',
+            restrictMismatchedBrackets: true,
+            supSubsRequireOperand: false,
+            charsThatBreakOutOfSupSub: '+-=<>',
+            autoSubscriptNumerals: true,
+            handlers: {
+              edit: function() {
+                const latex = mathField.latex();
+                onChange(latex);
+              }
+            }
+          });
+
+          mathFieldRef.current = mathField;
+
+          if (value) {
+            mathField.latex(value);
+          }
+        } catch (error) {
+          console.error("Error initializing MathQuill:", error);
+        }
+      };
+
+      initMathQuill();
+
+      return () => {
+        mounted = false;
+      };
+    }, []);
+
+    useEffect(() => {
+      if (mathFieldRef.current && value !== mathFieldRef.current.latex()) {
+        mathFieldRef.current.latex(value);
+      }
+    }, [value]);
+
+    return (
+      <div className="space-y-2">
+        <span
+          ref={spanRef}
+          className="mathquill-editable border border-input rounded-md bg-background p-3 min-h-[42px] block overflow-x-auto"
+        />
+        <p className="text-xs text-muted-foreground">
+          {placeholder || "Usa el teclado matemático o escribe directamente"}
+        </p>
+      </div>
+    );
+  }
+);
