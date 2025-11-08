@@ -5,35 +5,53 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { MathDisplay } from "@/components/MathDisplay";
 import { Calculator } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const DomainLimits = () => {
   const [functionInput, setFunctionInput] = useState("1/(x^2 + y^2 - 1)");
   const [point, setPoint] = useState("(0, 0)");
   const [domain, setDomain] = useState<string | null>(null);
   const [limit, setLimit] = useState<string | null>(null);
+  const [limitNote, setLimitNote] = useState<string | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const { toast } = useToast();
 
   const handleCalculateDomain = async () => {
     setIsCalculating(true);
     
     try {
-      // TODO: Replace with actual API call
-      const response = await fetch("/api/calculate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('calculate-domain-limits', {
+        body: { 
           operation: "domain",
-          function: functionInput,
-        }),
+          functionText: functionInput
+        }
       });
 
-      // Placeholder result
-      setDomain(`D = \\{(x,y) \\in \\mathbb{R}^2 : x^2 + y^2 \\neq 1\\}`);
+      if (error) throw error;
+
+      if (data?.error) {
+        toast({
+          title: "Error",
+          description: data.error,
+          variant: "destructive"
+        });
+        setDomain("\\text{Error al calcular dominio}");
+      } else {
+        setDomain(data.result);
+        toast({
+          title: "Cálculo completado",
+          description: "Dominio calculado exitosamente"
+        });
+      }
     } catch (error) {
       console.error("Calculation error:", error);
-      setDomain("\\text{Error calculating domain}");
+      toast({
+        title: "Error",
+        description: "Error al calcular el dominio",
+        variant: "destructive"
+      });
+      setDomain("\\text{Error al calcular dominio}");
     } finally {
       setIsCalculating(false);
     }
@@ -43,24 +61,42 @@ const DomainLimits = () => {
     setIsCalculating(true);
     
     try {
-      // TODO: Replace with actual API call
-      const response = await fetch("/api/calculate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('calculate-domain-limits', {
+        body: { 
           operation: "limit",
-          function: functionInput,
-          point: point,
-        }),
+          functionText: functionInput,
+          point: point
+        }
       });
 
-      // Placeholder result
-      setLimit(`\\lim_{(x,y) \\to ${point}} ${functionInput} = \\text{Result will appear here}`);
+      if (error) throw error;
+
+      if (data?.error) {
+        toast({
+          title: "Error",
+          description: data.error,
+          variant: "destructive"
+        });
+        setLimit("\\text{Error al calcular límite}");
+        setLimitNote(null);
+      } else {
+        const exists = data.exists ? "\\text{Existe}" : "\\text{No existe}";
+        setLimit(`${exists}: ${data.result}`);
+        setLimitNote(data.note || null);
+        toast({
+          title: "Cálculo completado",
+          description: "Límite calculado exitosamente"
+        });
+      }
     } catch (error) {
       console.error("Calculation error:", error);
-      setLimit("\\text{Error calculating limit}");
+      toast({
+        title: "Error",
+        description: "Error al calcular el límite",
+        variant: "destructive"
+      });
+      setLimit("\\text{Error al calcular límite}");
+      setLimitNote(null);
     } finally {
       setIsCalculating(false);
     }
@@ -147,10 +183,13 @@ const DomainLimits = () => {
           {limit && (
             <Card>
               <CardHeader>
-                <CardTitle>Limit Result</CardTitle>
+                <CardTitle>Resultado del Límite</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
                 <MathDisplay math={limit} />
+                {limitNote && (
+                  <p className="text-sm text-muted-foreground">{limitNote}</p>
+                )}
               </CardContent>
             </Card>
           )}

@@ -1,1 +1,13 @@
 project_id = "bsuxitzgpqpombfhtqbp"
+
+[functions.calculate-derivatives]
+verify_jwt = false
+
+[functions.calculate-optimization]
+verify_jwt = false
+
+[functions.calculate-integrals]
+verify_jwt = false
+
+[functions.calculate-domain-limits]
+verify_jwt = false

@@ -6,35 +6,51 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MathDisplay } from "@/components/MathDisplay";
 import { Calculator } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Derivatives = () => {
   const [functionInput, setFunctionInput] = useState("x^2 * y + y^3");
   const [variable, setVariable] = useState("x");
   const [result, setResult] = useState<string | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const { toast } = useToast();
 
   const handleCalculate = async () => {
     setIsCalculating(true);
     
     try {
-      // TODO: Replace with actual API call
-      const response = await fetch("/api/calculate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          operation: "derivative",
-          function: functionInput,
-          variable: variable,
-        }),
+      const { data, error } = await supabase.functions.invoke('calculate-derivatives', {
+        body: { 
+          functionText: functionInput,
+          variable: variable 
+        }
       });
 
-      // Placeholder result
-      setResult(`\\frac{\\partial}{\\partial ${variable}}(${functionInput}) = \\text{Result will appear here}`);
+      if (error) throw error;
+
+      if (data?.error) {
+        toast({
+          title: "Error",
+          description: data.error,
+          variant: "destructive"
+        });
+        setResult("\\text{Error al calcular}");
+      } else {
+        setResult(`\\frac{\\partial}{\\partial ${variable}}(${functionInput}) = ${data.result}`);
+        toast({
+          title: "Cálculo completado",
+          description: "Derivada parcial calculada exitosamente"
+        });
+      }
     } catch (error) {
       console.error("Calculation error:", error);
-      setResult("\\text{Error calculating derivative}");
+      toast({
+        title: "Error",
+        description: "Error al calcular la derivada",
+        variant: "destructive"
+      });
+      setResult("\\text{Error al calcular derivada}");
     } finally {
       setIsCalculating(false);
     }

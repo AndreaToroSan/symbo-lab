@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MathDisplay } from "@/components/MathDisplay";
 import { Calculator } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Integrals = () => {
   const [functionInput, setFunctionInput] = useState("x^2 + y^2");
@@ -17,39 +19,53 @@ const Integrals = () => {
   const [zMin, setZMin] = useState("-1");
   const [zMax, setZMax] = useState("1");
   const [result, setResult] = useState<string | null>(null);
+  const [setup, setSetup] = useState<string | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const { toast } = useToast();
 
   const handleCalculate = async () => {
     setIsCalculating(true);
     
-    // TODO: Replace with actual API call
     try {
-      // Simulated API call to /api/calculate
-      const response = await fetch("/api/calculate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          operation: "integral",
-          function: functionInput,
-          type: integralType,
-          bounds: integralType === "double" 
-            ? { x: [xMin, xMax], y: [yMin, yMax] }
-            : { x: [xMin, xMax], y: [yMin, yMax], z: [zMin, zMax] }
-        }),
+      const bounds = integralType === "double" 
+        ? { x: [parseFloat(xMin), parseFloat(xMax)], y: [parseFloat(yMin), parseFloat(yMax)] }
+        : { x: [parseFloat(xMin), parseFloat(xMax)], y: [parseFloat(yMin), parseFloat(yMax)], z: [parseFloat(zMin), parseFloat(zMax)] };
+
+      const { data, error } = await supabase.functions.invoke('calculate-integrals', {
+        body: { 
+          functionText: functionInput,
+          integralType,
+          bounds
+        }
       });
 
-      // For now, show a placeholder result
-      const integralSymbol = integralType === "double" ? "\\iint" : "\\iiint";
-      const bounds = integralType === "double"
-        ? `_{${yMin}}^{${yMax}} \\int_{${xMin}}^{${xMax}}`
-        : `_{${zMin}}^{${zMax}} \\int_{${yMin}}^{${yMax}} \\int_{${xMin}}^{${xMax}}`;
-      
-      setResult(`${integralSymbol}${bounds} (${functionInput}) \\, dx \\, dy ${integralType === "triple" ? "\\, dz" : ""} = \\text{Result will appear here}`);
+      if (error) throw error;
+
+      if (data?.error) {
+        toast({
+          title: "Error",
+          description: data.error,
+          variant: "destructive"
+        });
+        setResult("\\text{Error al calcular}");
+        setSetup(null);
+      } else {
+        setSetup(data.setup);
+        setResult(data.result);
+        toast({
+          title: "Cálculo completado",
+          description: "Integral calculada exitosamente"
+        });
+      }
     } catch (error) {
       console.error("Calculation error:", error);
-      setResult("\\text{Error calculating integral}");
+      toast({
+        title: "Error",
+        description: "Error al calcular la integral",
+        variant: "destructive"
+      });
+      setResult("\\text{Error al calcular integral}");
+      setSetup(null);
     } finally {
       setIsCalculating(false);
     }
@@ -160,21 +176,35 @@ const Integrals = () => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Result</CardTitle>
-            <CardDescription>Integral calculation result</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {result ? (
-              <MathDisplay math={result} />
-            ) : (
-              <p className="text-muted-foreground text-center py-8">
-                Enter a function and click calculate to see the result
-              </p>
-            )}
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+          {setup && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Configuración</CardTitle>
+                <CardDescription>Integral configurada</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <MathDisplay math={setup} />
+              </CardContent>
+            </Card>
+          )}
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Resultado</CardTitle>
+              <CardDescription>Valor de la integral</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {result ? (
+                <MathDisplay math={result} />
+              ) : (
+                <p className="text-muted-foreground text-center py-8">
+                  Ingresa una función y haz clic en calcular para ver el resultado
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

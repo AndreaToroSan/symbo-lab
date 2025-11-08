@@ -5,35 +5,50 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { MathDisplay } from "@/components/MathDisplay";
 import { Calculator } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Optimization = () => {
   const [functionInput, setFunctionInput] = useState("x^2 + y^2 - 2*x - 4*y");
   const [criticalPoints, setCriticalPoints] = useState<string | null>(null);
   const [classification, setClassification] = useState<string | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const { toast } = useToast();
 
   const handleCalculate = async () => {
     setIsCalculating(true);
     
     try {
-      // TODO: Replace with actual API call
-      const response = await fetch("/api/calculate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          operation: "optimize",
-          function: functionInput,
-        }),
+      const { data, error } = await supabase.functions.invoke('calculate-optimization', {
+        body: { functionText: functionInput }
       });
 
-      // Placeholder results
-      setCriticalPoints("\\text{Critical Points: } (1, 2)");
-      setClassification("\\text{Classification: Local Minimum at } (1, 2)");
+      if (error) throw error;
+
+      if (data?.error) {
+        toast({
+          title: "Error",
+          description: data.error,
+          variant: "destructive"
+        });
+        setCriticalPoints("\\text{Error al calcular}");
+        setClassification("");
+      } else {
+        setCriticalPoints(data.criticalPoints);
+        setClassification(data.classification);
+        toast({
+          title: "Cálculo completado",
+          description: "Puntos críticos encontrados exitosamente"
+        });
+      }
     } catch (error) {
       console.error("Calculation error:", error);
-      setCriticalPoints("\\text{Error finding critical points}");
+      toast({
+        title: "Error",
+        description: "Error al encontrar puntos críticos",
+        variant: "destructive"
+      });
+      setCriticalPoints("\\text{Error al encontrar puntos críticos}");
       setClassification("");
     } finally {
       setIsCalculating(false);
