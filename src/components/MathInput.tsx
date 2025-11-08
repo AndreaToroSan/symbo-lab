@@ -84,6 +84,16 @@ export const MathInput = forwardRef<MathInputRef, MathInputProps>(
 
     return (
       <div className="space-y-2">
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            .mathquill-editable .mq-empty {
+              background: hsl(var(--muted)) !important;
+            }
+            .mathquill-editable .mq-cursor {
+              border-left: 2px solid hsl(var(--primary)) !important;
+            }
+          `
+        }} />
         <span
           ref={spanRef}
           className="mathquill-editable border border-input rounded-md bg-background p-3 min-h-[42px] block overflow-x-auto"
