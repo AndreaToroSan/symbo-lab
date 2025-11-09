@@ -36,7 +36,7 @@ Reglas:
 2. Evalúa ambas en el punto dado
 3. Calcula la magnitud del gradiente
 4. Normaliza el vector para obtener la dirección
-5. Usa notación LaTeX estándar
+5. Usa notación LaTeX estándar SIN símbolos $ (no uses $, escribe LaTeX directo)
 6. Responde SOLO con el JSON, sin texto adicional`;
 
       userPrompt = `Calcula el gradiente de ${functionText} en el punto (${point.x}, ${point.y})`;
@@ -48,7 +48,8 @@ Reglas:
 2. Simplifica el resultado lo más posible
 3. Responde SOLO con la expresión en LaTeX, sin explicaciones adicionales
 4. Usa notación matemática estándar de LaTeX
-5. No incluyas el símbolo de derivada parcial en tu respuesta, solo el resultado`;
+5. NO uses símbolos $ en tu respuesta (no uses $, escribe LaTeX directo)
+6. No incluyas el símbolo de derivada parcial en tu respuesta, solo el resultado`;
 
       userPrompt = `Calcula la derivada parcial de ${functionText} con respecto a ${variable}`;
     }
@@ -85,13 +86,22 @@ Reglas:
     }
 
     const data = await response.json();
-    const content = data.choices[0].message.content.trim();
+    let content = data.choices[0].message.content.trim();
+    
+    // Remove $ symbols if present
+    content = content.replace(/\$/g, '');
     
     let result;
     if (operation === 'gradient') {
       try {
         const cleanContent = content.replace(/```json\n?|\n?```/g, '');
-        result = JSON.parse(cleanContent);
+        const parsed = JSON.parse(cleanContent);
+        // Clean $ from all fields
+        result = {
+          vector: parsed.vector?.replace(/\$/g, '') || "\\text{Error}",
+          magnitude: parsed.magnitude?.replace(/\$/g, '') || "\\text{Error}",
+          direction: parsed.direction?.replace(/\$/g, '') || "\\text{Error}"
+        };
       } catch (e) {
         result = {
           vector: "\\text{Error procesando gradiente}",

@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Grid, Line } from "@react-three/drei";
 import * as THREE from "three";
 import { QuadricSurface3D } from "./QuadricSurface3D";
@@ -118,12 +118,6 @@ function Surface({ formula, xRange, yRange, resolution = 50, visualizationType =
   geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
   geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
   geometry.computeVertexNormals();
-
-  useFrame(() => {
-    if (meshRef.current) {
-      meshRef.current.rotation.z += 0.001;
-    }
-  });
 
   return (
     <mesh ref={meshRef} geometry={geometry}>

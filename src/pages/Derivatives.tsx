@@ -44,7 +44,7 @@ const Derivatives = () => {
         });
         setResult("\\text{Error al calcular}");
       } else {
-        setResult(`\\frac{\\partial}{\\partial ${variable}}(${functionInput}) = ${data.result}`);
+        setResult(data.result);
         toast({
           title: "Cálculo completado",
           description: "Derivada parcial calculada exitosamente"
@@ -194,7 +194,7 @@ const Derivatives = () => {
           {result && (
             <Card>
               <CardHeader>
-                <CardTitle>Partial Derivative</CardTitle>
+                <CardTitle>Partial Derivative ∂f/∂{variable}</CardTitle>
               </CardHeader>
               <CardContent>
                 <MathDisplay math={result} />

@@ -40,7 +40,8 @@ Reglas:
 2. Muestra los límites de integración claramente
 3. Calcula el resultado final (puede ser numérico o simbólico)
 4. Si la integral es muy compleja, proporciona el setup y una aproximación
-5. Responde SOLO con el JSON, sin texto adicional`;
+5. NO uses símbolos $ en tu respuesta (no uses $, escribe LaTeX directo)
+6. Responde SOLO con el JSON, sin texto adicional`;
 
     const userPrompt = `Calcula la integral ${isTriple ? 'triple' : 'doble'} de: ${functionText}
 Con límites: ${boundsDescription}`;
@@ -81,8 +82,12 @@ Con límites: ${boundsDescription}`;
     
     let result;
     try {
-      const cleanContent = content.replace(/```json\n?|\n?```/g, '');
-      result = JSON.parse(cleanContent);
+      const cleanContent = content.replace(/```json\n?|\n?```/g, '').replace(/\$/g, '');
+      const parsed = JSON.parse(cleanContent);
+      result = {
+        setup: parsed.setup?.replace(/\$/g, '') || `${integralSymbol} (${functionText})`,
+        result: parsed.result?.replace(/\$/g, '') || "\\text{Error procesando resultado}"
+      };
     } catch (e) {
       result = {
         setup: `${integralSymbol} (${functionText})`,

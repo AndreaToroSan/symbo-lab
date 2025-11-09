@@ -29,7 +29,8 @@ Reglas:
 2. Usa notación de conjuntos: \\{(x,y) \\in \\mathbb{R}^2 : condiciones\\}
 3. Identifica restricciones: denominadores no nulos, raíces no negativas, logaritmos positivos, etc.
 4. Simplifica las condiciones cuando sea posible
-5. Si la función está definida en todo R², indica: D = \\mathbb{R}^2`;
+5. Si la función está definida en todo R², indica: D = \\mathbb{R}^2
+6. NO uses símbolos $ en tu respuesta (no uses $, escribe LaTeX directo)`;
 
       userPrompt = `Determina el dominio de: ${functionText}`;
     } else if (operation === "range") {
@@ -40,7 +41,8 @@ Reglas:
 2. Usa notación de intervalos o conjuntos: [a, b], (a, \\infty), \\mathbb{R}, etc.
 3. Analiza valores máximos, mínimos y comportamiento asintótico
 4. Simplifica la expresión cuando sea posible
-5. Si el rango es todo R, indica: R = \\mathbb{R}`;
+5. Si el rango es todo R, indica: R = \\mathbb{R}
+6. NO uses símbolos $ en tu respuesta (no uses $, escribe LaTeX directo)`;
 
       userPrompt = `Determina el rango de: ${functionText}`;
     } else {
@@ -58,7 +60,8 @@ Reglas:
 2. Si existe, calcula su valor
 3. Si no existe, explica por qué (diferentes valores por diferentes trayectorias)
 4. Usa notación LaTeX estándar
-5. Responde SOLO con el JSON, sin texto adicional`;
+5. NO uses símbolos $ en tu respuesta (no uses $, escribe LaTeX directo)
+6. Responde SOLO con el JSON, sin texto adicional`;
 
       userPrompt = `Calcula el límite de ${functionText} cuando (x,y) → ${point}`;
     }
@@ -95,7 +98,10 @@ Reglas:
     }
 
     const data = await response.json();
-    const content = data.choices[0].message.content.trim();
+    let content = data.choices[0].message.content.trim();
+    
+    // Remove $ symbols if present
+    content = content.replace(/\$/g, '');
     
     let result;
     if (operation === "domain" || operation === "range") {
@@ -103,7 +109,12 @@ Reglas:
     } else {
       try {
         const cleanContent = content.replace(/```json\n?|\n?```/g, '');
-        result = JSON.parse(cleanContent);
+        const parsed = JSON.parse(cleanContent);
+        result = {
+          exists: parsed.exists,
+          result: parsed.result?.replace(/\$/g, '') || "\\text{Error}",
+          note: parsed.note || ""
+        };
       } catch (e) {
         result = {
           exists: false,

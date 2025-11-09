@@ -1,5 +1,4 @@
 import { useRef } from "react";
-import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
 interface QuadricSurface3DProps {
@@ -132,15 +131,6 @@ export function QuadricSurface3D({
     geometry2.setAttribute("color", new THREE.Float32BufferAttribute(colors2, 3));
     geometry2.computeVertexNormals();
   }
-
-  useFrame(() => {
-    if (meshRef.current) {
-      meshRef.current.rotation.z += 0.001;
-    }
-    if (meshRef2.current) {
-      meshRef2.current.rotation.z += 0.001;
-    }
-  });
 
   return (
     <>

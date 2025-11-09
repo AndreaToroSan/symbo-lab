@@ -35,7 +35,8 @@ Reglas:
 2. Resuelve el sistema para encontrar los puntos críticos
 3. Evalúa f en cada punto para determinar cuál es máximo y mínimo
 4. Usa notación LaTeX estándar
-5. Responde SOLO con el JSON, sin texto adicional`;
+5. NO uses símbolos $ en tu respuesta (no uses $, escribe LaTeX directo)
+6. Responde SOLO con el JSON, sin texto adicional`;
 
       userPrompt = `Optimiza ${functionText} sujeto a la restricción ${constraint} = 0 usando Multiplicadores de Lagrange`;
     } else {
@@ -51,7 +52,8 @@ Reglas:
 2. Evalúa el Hessiano (matriz de segundas derivadas) en cada punto crítico
 3. Clasifica cada punto: mínimo local (D>0, fxx>0), máximo local (D>0, fxx<0), punto silla (D<0), o indeterminado (D=0)
 4. Usa notación LaTeX estándar
-5. Responde SOLO con el JSON, sin texto adicional`;
+5. NO uses símbolos $ en tu respuesta (no uses $, escribe LaTeX directo)
+6. Responde SOLO con el JSON, sin texto adicional`;
 
       userPrompt = `Encuentra y clasifica los puntos críticos de: ${functionText}`;
     }
@@ -88,14 +90,30 @@ Reglas:
     }
 
     const data = await response.json();
-    const content = data.choices[0].message.content.trim();
+    let content = data.choices[0].message.content.trim();
+    
+    // Remove $ symbols if present
+    content = content.replace(/\$/g, '');
     
     // Try to parse JSON from the response
     let result;
     try {
       // Remove markdown code blocks if present
       const cleanContent = content.replace(/```json\n?|\n?```/g, '');
-      result = JSON.parse(cleanContent);
+      const parsed = JSON.parse(cleanContent);
+      
+      if (operation === 'lagrange') {
+        result = {
+          system: parsed.system?.replace(/\$/g, '') || "\\text{Error}",
+          points: parsed.points?.replace(/\$/g, '') || "\\text{Error}",
+          values: parsed.values?.replace(/\$/g, '') || ""
+        };
+      } else {
+        result = {
+          criticalPoints: parsed.criticalPoints?.replace(/\$/g, '') || "\\text{Error}",
+          classification: parsed.classification?.replace(/\$/g, '') || "\\text{Error}"
+        };
+      }
     } catch (e) {
       // If parsing fails, return a formatted error
       result = {
