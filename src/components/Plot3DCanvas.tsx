@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Grid, Line } from "@react-three/drei";
+import { OrbitControls, Grid, Line, Text } from "@react-three/drei";
 import * as THREE from "three";
 import { QuadricSurface3D } from "./QuadricSurface3D";
 
@@ -120,9 +120,60 @@ function Surface({ formula, xRange, yRange, resolution = 50, visualizationType =
   geometry.computeVertexNormals();
 
   return (
-    <mesh ref={meshRef} geometry={geometry}>
-      <meshPhongMaterial vertexColors side={THREE.DoubleSide} />
-    </mesh>
+    <>
+      <mesh ref={meshRef} geometry={geometry}>
+        <meshPhongMaterial vertexColors side={THREE.DoubleSide} />
+      </mesh>
+      {/* Z range indicator */}
+      <Text position={[-5, maxZ + 0.5, 0]} fontSize={0.25} color="#95e1d3">
+        Max: {maxZ.toFixed(2)}
+      </Text>
+      <Text position={[-5, minZ - 0.5, 0]} fontSize={0.25} color="#95e1d3">
+        Min: {minZ.toFixed(2)}
+      </Text>
+    </>
+  );
+}
+
+function AxisLabels({ xRange, yRange }: { xRange: [number, number]; yRange: [number, number] }) {
+  const [xMin, xMax] = xRange;
+  const [yMin, yMax] = yRange;
+  
+  return (
+    <>
+      {/* X axis labels */}
+      <Text position={[xMax + 0.5, 0, 0]} fontSize={0.3} color="#ff6b6b">
+        X
+      </Text>
+      <Text position={[xMin, -0.3, 0]} fontSize={0.2} color="#888">
+        {xMin.toFixed(1)}
+      </Text>
+      <Text position={[xMax, -0.3, 0]} fontSize={0.2} color="#888">
+        {xMax.toFixed(1)}
+      </Text>
+      
+      {/* Y axis labels */}
+      <Text position={[0, 0, yMax + 0.5]} fontSize={0.3} color="#4ecdc4">
+        Y
+      </Text>
+      <Text position={[0, -0.3, yMin]} fontSize={0.2} color="#888">
+        {yMin.toFixed(1)}
+      </Text>
+      <Text position={[0, -0.3, yMax]} fontSize={0.2} color="#888">
+        {yMax.toFixed(1)}
+      </Text>
+      
+      {/* Z axis label */}
+      <Text position={[0, 5.5, 0]} fontSize={0.3} color="#95e1d3">
+        Z
+      </Text>
+      
+      {/* Origin marker */}
+      <mesh position={[0, 0, 0]}>
+        <sphereGeometry args={[0.1, 16, 16]} />
+        <meshBasicMaterial color="#ffffff" />
+      </mesh>
+    </>
   );
 }
 
@@ -162,6 +213,8 @@ export const Plot3DCanvas = (props: Plot3DCanvasProps) => {
           fadeStrength={1}
           followCamera={false}
         />
+        
+        <AxisLabels xRange={props.xRange} yRange={props.yRange} />
         
         <OrbitControls enableDamping dampingFactor={0.05} />
         

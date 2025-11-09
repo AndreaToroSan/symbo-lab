@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plot3DCanvas } from "@/components/Plot3DCanvas";
 import { MathKeyboard } from "@/components/MathKeyboard";
 import { MathInput, MathInputRef } from "@/components/MathInput";
+import { MathDisplay } from "@/components/MathDisplay";
 import { Eye, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -116,12 +117,34 @@ const Visualization3D = () => {
             Tipos de Visualización Automática
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <div><Badge variant="outline">Superficie</Badge>: x^2 + y^2 (funciones de x,y)</div>
-            <div><Badge variant="outline">Paramétrica</Badge>: (cos(t), sin(t), t)</div>
-            <div><Badge variant="outline">Implícita</Badge>: x^2 + y^2 + z^2 = 1</div>
-            <div><Badge variant="outline">Campo Vectorial</Badge>: (-y, x)</div>
+        <CardContent className="space-y-3 text-sm">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">Superficie</Badge>
+              <span>z = f(x,y), ejemplo:</span>
+            </div>
+            <MathDisplay math="x^2 + y^2" displayMode={false} />
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">Paramétrica</Badge>
+              <span>ejemplo:</span>
+            </div>
+            <MathDisplay math="(\cos(t), \sin(t), t)" displayMode={false} />
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">Implícita</Badge>
+              <span>F(x,y,z) = c, ejemplo:</span>
+            </div>
+            <MathDisplay math="x^2 + y^2 + z^2 = 1" displayMode={false} />
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">Campo Vectorial</Badge>
+              <span>ejemplo:</span>
+            </div>
+            <MathDisplay math="(-y, x)" displayMode={false} />
           </div>
         </CardContent>
       </Card>
@@ -130,12 +153,22 @@ const Visualization3D = () => {
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle>Ingresa tu Función</CardTitle>
-            <CardDescription>
-              {detectedType === "surface" && "Detectado: Superficie z = f(x,y)"}
-              {detectedType === "parametric" && "Detectado: Curva Paramétrica 3D"}
-              {detectedType === "implicit" && "Detectado: Superficie Implícita"}
-              {detectedType === "vector-field" && "Detectado: Campo Vectorial"}
-              {detectedType === "contour" && "Detectado: Curvas de Nivel"}
+            <CardDescription className="space-y-1">
+              {detectedType === "surface" && (
+                <div>Detectado: Superficie <MathDisplay math="z = f(x,y)" displayMode={false} /></div>
+              )}
+              {detectedType === "parametric" && (
+                <div>Detectado: Curva Paramétrica 3D</div>
+              )}
+              {detectedType === "implicit" && (
+                <div>Detectado: Superficie Implícita <MathDisplay math="F(x,y,z) = 0" displayMode={false} /></div>
+              )}
+              {detectedType === "vector-field" && (
+                <div>Detectado: Campo Vectorial</div>
+              )}
+              {detectedType === "contour" && (
+                <div>Detectado: Curvas de Nivel</div>
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -147,9 +180,14 @@ const Visualization3D = () => {
                 onChange={setFunctionLatex}
                 placeholder="x^2 + y^2"
               />
-              <p className="text-xs text-muted-foreground">
-                Ejemplos: x^2+y^2 | (cos(t), sin(t), t) | x^2+y^2+z^2=1
-              </p>
+              <div className="text-xs text-muted-foreground space-y-1">
+                <p>Ejemplos:</p>
+                <div className="pl-2 space-y-1">
+                  <MathDisplay math="x^2+y^2" displayMode={false} />
+                  <MathDisplay math="(\cos(t), \sin(t), t)" displayMode={false} />
+                  <MathDisplay math="x^2+y^2+z^2=1" displayMode={false} />
+                </div>
+              </div>
             </div>
 
             <MathKeyboard onInsert={handleInsertSymbol} />
@@ -207,12 +245,22 @@ const Visualization3D = () => {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Visualización 3D</CardTitle>
-            <CardDescription>
-              {currentType === "surface" && "Superficie z = f(x,y)"}
-              {currentType === "parametric" && "Curva Paramétrica 3D"}
-              {currentType === "implicit" && "Superficie Implícita F(x,y,z) = 0"}
-              {currentType === "vector-field" && "Campo Vectorial 2D"}
-              {currentType === "contour" && "Curvas de Nivel"}
+            <CardDescription className="space-y-1">
+              {currentType === "surface" && (
+                <div>Superficie: <MathDisplay math="z = f(x,y)" displayMode={false} /></div>
+              )}
+              {currentType === "parametric" && (
+                <div>Curva Paramétrica 3D: <MathDisplay math="\mathbf{r}(t) = (x(t), y(t), z(t))" displayMode={false} /></div>
+              )}
+              {currentType === "implicit" && (
+                <div>Superficie Implícita: <MathDisplay math="F(x,y,z) = 0" displayMode={false} /></div>
+              )}
+              {currentType === "vector-field" && (
+                <div>Campo Vectorial 2D: <MathDisplay math="\mathbf{F}(x,y) = (P(x,y), Q(x,y))" displayMode={false} /></div>
+              )}
+              {currentType === "contour" && (
+                <div>Curvas de Nivel: <MathDisplay math="f(x,y) = k" displayMode={false} /></div>
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent>
