@@ -34,17 +34,21 @@ Tabla de Clasificación:
 Devuelve un JSON con el siguiente formato:
 {
   "type": "nombre de la superficie (español)",
-  "canonical_form": "forma canónica en LaTeX",
+  "canonical_form": "forma canónica en LaTeX puro sin símbolos $ ni delimitadores",
   "characteristics": ["característica 1", "característica 2", ...],
   "parameters": {
     "a": valor o null,
     "b": valor o null,
     "c": valor o null
   },
-  "description": "descripción detallada de la superficie en LaTeX",
+  "description": "descripción detallada de la superficie en texto plano, sin LaTeX ni símbolos matemáticos especiales",
   "center": "(x0, y0, z0) o null si está en el origen",
   "axes": "descripción de los ejes principales"
 }
+
+IMPORTANTE: 
+- canonical_form debe ser LaTeX puro sin símbolos $ (ejemplo: "\\frac{x^2}{a^2} + \\frac{y^2}{b^2} + \\frac{z^2}{c^2} = 1")
+- description debe ser texto plano explicativo, SIN símbolos LaTeX ni $ (ejemplo: "Es una superficie cerrada con forma ovalada que se extiende en todas las direcciones desde su centro.")
 
 Si la ecuación no está en forma canónica, primero conviértela y luego clasifícala.
 Sé preciso matemáticamente y verifica todos los signos.`;
