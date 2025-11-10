@@ -250,7 +250,9 @@ const QuadricSurfaces = () => {
 
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Descripción</h3>
-                    <p className="text-muted-foreground">{classification.description}</p>
+                    <p className="text-muted-foreground whitespace-normal break-words leading-relaxed">
+                      {classification.description}
+                    </p>
                   </div>
 
                   {classification.center && (

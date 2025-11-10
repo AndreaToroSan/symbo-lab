@@ -41,19 +41,20 @@ Devuelve un JSON con el siguiente formato:
     "b": valor o null,
     "c": valor o null
   },
-  "description": "descripción detallada de la superficie en texto plano normal con espacios entre palabras, sin LaTeX ni símbolos matemáticos especiales",
+  "description": "descripción en texto plano",
   "center": "(x0, y0, z0) o null si está en el origen",
   "axes": "descripción de los ejes principales"
 }
 
-IMPORTANTE: 
-- canonical_form debe ser LaTeX puro sin símbolos $ (ejemplo: "\\frac{x^2}{a^2} + \\frac{y^2}{b^2} + \\frac{z^2}{c^2} = 1")
-- description debe ser texto plano explicativo con espacios correctos entre todas las palabras, SIN símbolos LaTeX ni $ (ejemplo: "Es una superficie cerrada con forma ovalada que se extiende en todas las direcciones desde su centro. Tiene tres semiejes de diferentes longitudes.")
+REGLAS CRÍTICAS PARA LA DESCRIPCIÓN:
+1. Escribe en TEXTO PLANO normal, sin LaTeX
+2. DEBE tener ESPACIOS entre TODAS las palabras
+3. USA ACENTOS NORMALES (á, é, í, ó, ú) NO símbolos especiales
+4. Escribe números y letras normalmente (a, b, c NO a², b², c²)
+5. Máximo 3-4 oraciones cortas y claras
+6. Ejemplo CORRECTO: "El hiperboloide de dos hojas es una superficie no acotada que consta de dos partes separadas. Cada parte se extiende infinitamente en direcciones opuestas. Tiene simetría con respecto a los tres ejes coordenados."
 
-CRÍTICO: La descripción debe tener espacios normales entre cada palabra, como texto legible en español.
-
-Si la ecuación no está en forma canónica, primero conviértela y luego clasifícala.
-Sé preciso matemáticamente y verifica todos los signos.`;
+Si la ecuación no está en forma canónica, primero conviértela y luego clasifícala.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -100,6 +101,15 @@ Sé preciso matemáticamente y verifica todos los signos.`;
 
     // Parse the JSON response
     const classification = JSON.parse(aiResponse);
+    
+    // Clean up description: ensure proper spacing and encoding
+    if (classification.description) {
+      classification.description = classification.description
+        .replace(/([a-záéíóúñ])([A-ZÁÉÍÓÚÑ])/g, '$1 $2') // Add space between lowercase and uppercase
+        .replace(/([a-z])([A-Z])/g, '$1 $2') // Add space between words stuck together
+        .replace(/\s+/g, ' ') // Normalize multiple spaces to single space
+        .trim();
+    }
 
     return new Response(JSON.stringify({ classification }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
