@@ -27,5 +27,5 @@ export const MathDisplay = ({ math, displayMode = true }: MathDisplayProps) => {
     }
   }, [math, displayMode]);
 
-  return <div ref={containerRef} className="p-4 bg-muted/30 rounded-lg" />;
+  return <div ref={containerRef} className="p-4 bg-muted/30 rounded-lg overflow-x-auto max-w-full" />;
 };
