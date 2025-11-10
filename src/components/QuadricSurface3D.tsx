@@ -44,14 +44,19 @@ export function QuadricSurface3D({
       // Use math evaluation
       const result = eval(func.replace(/\^/g, "**"));
       
-      // Check if result is valid
+      // Check if result is valid (must be a real number)
       if (isNaN(result) || !isFinite(result)) {
         return { upper: NaN, lower: NaN };
       }
       
-      // For surfaces with ± solutions, return both
-      // If showBothSides is true, create symmetric surface
-      return { upper: result, lower: showBothSides ? -result : NaN };
+      // For square root results (always positive), create both ± surfaces
+      // This handles surfaces like ellipsoids, hyperboloids, cones
+      if (showBothSides) {
+        return { upper: result, lower: -result };
+      } else {
+        // For explicit z = f(x,y) surfaces like paraboloids
+        return { upper: result, lower: NaN };
+      }
     } catch {
       return { upper: NaN, lower: NaN };
     }
