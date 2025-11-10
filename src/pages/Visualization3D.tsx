@@ -192,6 +192,13 @@ const Visualization3D = () => {
 
             <MathKeyboard onInsert={handleInsertSymbol} />
 
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Rangos de Visualización</Label>
+              <p className="text-xs text-muted-foreground">
+                Define la ventana de visualización (qué porción de la gráfica se mostrará)
+              </p>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="xMin">x/t min</Label>
