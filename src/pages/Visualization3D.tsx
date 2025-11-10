@@ -45,6 +45,35 @@ const Visualization3D = () => {
     return result;
   };
 
+  // Convierte una ecuación implícita a forma explícita z = f(x,y)
+  const convertImplicitToExplicit = (latex: string): string => {
+    const normalized = latex.toLowerCase().replace(/\s+/g, '');
+    
+    // Detectar esfera: x^2+y^2+z^2=r^2 -> z = sqrt(r^2 - x^2 - y^2)
+    const sphereMatch = normalized.match(/x\*\*2\+y\*\*2\+z\*\*2=(\d+)/);
+    if (sphereMatch) {
+      const r2 = sphereMatch[1];
+      return `Math.sqrt(${r2} - x**2 - y**2)`;
+    }
+    
+    // Detectar cilindro: x^2+y^2=r^2 -> z = 0 (plano extruido)
+    const cylinderMatch = normalized.match(/x\*\*2\+y\*\*2=(\d+)/);
+    if (cylinderMatch) {
+      const r2 = cylinderMatch[1];
+      return `Math.sqrt(${r2} - x**2 - y**2)`;
+    }
+    
+    // Detectar elipsoide: x^2/a^2 + y^2/b^2 + z^2/c^2 = 1
+    const ellipsoidMatch = normalized.match(/x\*\*2\/(\d+)\+y\*\*2\/(\d+)\+z\*\*2\/(\d+)=1/);
+    if (ellipsoidMatch) {
+      const [, a2, b2, c2] = ellipsoidMatch;
+      return `Math.sqrt(${c2} * (1 - x**2/${a2} - y**2/${b2}))`;
+    }
+    
+    // Si no se puede convertir, retornar como está
+    return latex;
+  };
+
   // Detecta automáticamente el tipo de visualización basándose en la ecuación
   const detectVisualizationType = (latex: string): VisualizationType => {
     const normalized = latex.toLowerCase().replace(/\s+/g, '');
@@ -80,7 +109,13 @@ const Visualization3D = () => {
     const type = detectVisualizationType(functionLatex);
     setDetectedType(type);
     
-    const plotlyFunction = latexToPlotly(functionLatex);
+    let plotlyFunction = latexToPlotly(functionLatex);
+    
+    // Si es implícita, convertir a forma explícita para QuadricSurface3D
+    if (type === "implicit") {
+      plotlyFunction = convertImplicitToExplicit(plotlyFunction);
+    }
+    
     setCurrentFunction(plotlyFunction);
     setCurrentType(type);
     
@@ -271,7 +306,7 @@ const Visualization3D = () => {
                 xRange={[-5, 5]}
                 yRange={[-5, 5]}
                 tRange={[0, 6.28]}
-                visualizationType={currentType}
+                visualizationType={currentType === "implicit" ? "quadric" : currentType}
               />
               <p className="text-xs text-muted-foreground mt-4 text-center">
                 Arrastra para rotar • Rueda para zoom • Click derecho para mover
