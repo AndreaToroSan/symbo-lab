@@ -15,12 +15,6 @@ type VisualizationType = "surface" | "parametric" | "contour" | "vector-field" |
 
 const Visualization3D = () => {
   const [functionLatex, setFunctionLatex] = useState("x^2+y^2");
-  const [xMin, setXMin] = useState("-3");
-  const [xMax, setXMax] = useState("3");
-  const [yMin, setYMin] = useState("-3");
-  const [yMax, setYMax] = useState("3");
-  const [tMin, setTMin] = useState("0");
-  const [tMax, setTMax] = useState("6.28");
   const [currentFunction, setCurrentFunction] = useState("x**2 + y**2");
   const [currentType, setCurrentType] = useState<VisualizationType>("surface");
   const [detectedType, setDetectedType] = useState<VisualizationType>("surface");
@@ -41,11 +35,12 @@ const Visualization3D = () => {
       .replace(/\\log/g, 'log10')
       .replace(/\\exp/g, 'exp')
       .replace(/\\sqrt\{([^}]+)\}/g, 'sqrt($1)')
-      .replace(/\\pi/g, 'pi')
-      .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)')
+      .replace(/\\pi/g, 'Math.PI')
+      .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '(($1)/($2))')
       .replace(/\^(\d)/g, '**$1')
       .replace(/\^\{([^}]+)\}/g, '**($1)')
-      .replace(/\s+/g, '');
+      .replace(/\s+/g, ' ')
+      .trim();
     
     return result;
   };
@@ -192,56 +187,6 @@ const Visualization3D = () => {
 
             <MathKeyboard onInsert={handleInsertSymbol} />
 
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Rangos de Visualización</Label>
-              <p className="text-xs text-muted-foreground">
-                Define la ventana de visualización (qué porción de la gráfica se mostrará)
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="xMin">x/t min</Label>
-                <Input
-                  id="xMin"
-                  type="number"
-                  value={xMin}
-                  onChange={(e) => setXMin(e.target.value)}
-                  placeholder="-3"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="xMax">x/t max</Label>
-                <Input
-                  id="xMax"
-                  type="number"
-                  value={xMax}
-                  onChange={(e) => setXMax(e.target.value)}
-                  placeholder="3"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="yMin">y min</Label>
-                <Input
-                  id="yMin"
-                  type="number"
-                  value={yMin}
-                  onChange={(e) => setYMin(e.target.value)}
-                  placeholder="-3"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="yMax">y max</Label>
-                <Input
-                  id="yMax"
-                  type="number"
-                  value={yMax}
-                  onChange={(e) => setYMax(e.target.value)}
-                  placeholder="3"
-                />
-              </div>
-            </div>
-
             <Button onClick={handleVisualize} className="w-full">
               <Eye className="mr-2 h-4 w-4" />
               Visualizar
@@ -249,40 +194,88 @@ const Visualization3D = () => {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Visualización 3D</CardTitle>
-            <CardDescription className="space-y-1">
-              {currentType === "surface" && (
-                <div>Superficie: <MathDisplay math="z = f(x,y)" displayMode={false} /></div>
-              )}
-              {currentType === "parametric" && (
-                <div>Curva Paramétrica 3D: <MathDisplay math="\mathbf{r}(t) = (x(t), y(t), z(t))" displayMode={false} /></div>
-              )}
-              {currentType === "implicit" && (
-                <div>Superficie Implícita: <MathDisplay math="F(x,y,z) = 0" displayMode={false} /></div>
-              )}
-              {currentType === "vector-field" && (
-                <div>Campo Vectorial 2D: <MathDisplay math="\mathbf{F}(x,y) = (P(x,y), Q(x,y))" displayMode={false} /></div>
-              )}
-              {currentType === "contour" && (
-                <div>Curvas de Nivel: <MathDisplay math="f(x,y) = k" displayMode={false} /></div>
-              )}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Plot3DCanvas
-              formula={currentFunction}
-              xRange={[parseFloat(xMin), parseFloat(xMax)]}
-              yRange={[parseFloat(yMin), parseFloat(yMax)]}
-              tRange={[parseFloat(tMin), parseFloat(tMax)]}
-              visualizationType={currentType}
-            />
-            <p className="text-xs text-muted-foreground mt-4 text-center">
-              Arrastra para rotar • Rueda para zoom • Click derecho para mover
-            </p>
-          </CardContent>
-        </Card>
+        <div className="lg:col-span-2 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Visualización 3D Interactiva</CardTitle>
+              <CardDescription className="space-y-1">
+                {currentType === "surface" && (
+                  <div>Superficie: <MathDisplay math="z = f(x,y)" displayMode={false} /></div>
+                )}
+                {currentType === "parametric" && (
+                  <div>Curva Paramétrica 3D: <MathDisplay math="\mathbf{r}(t) = (x(t), y(t), z(t))" displayMode={false} /></div>
+                )}
+                {currentType === "implicit" && (
+                  <div>Superficie Implícita: <MathDisplay math="F(x,y,z) = 0" displayMode={false} /></div>
+                )}
+                {currentType === "vector-field" && (
+                  <div>Campo Vectorial 2D: <MathDisplay math="\mathbf{F}(x,y) = (P(x,y), Q(x,y))" displayMode={false} /></div>
+                )}
+                {currentType === "contour" && (
+                  <div>Curvas de Nivel: <MathDisplay math="f(x,y) = k" displayMode={false} /></div>
+                )}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Plot3DCanvas
+                formula={currentFunction}
+                xRange={[-5, 5]}
+                yRange={[-5, 5]}
+                tRange={[0, 6.28]}
+                visualizationType={currentType}
+              />
+              <p className="text-xs text-muted-foreground mt-4 text-center">
+                Arrastra para rotar • Rueda para zoom • Click derecho para mover
+              </p>
+            </CardContent>
+          </Card>
+
+          {currentType === "surface" && (
+            <Card className="border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Info className="h-5 w-5 text-primary" />
+                  Análisis de la Función
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-2 text-sm">Intersecciones con los Planos Coordenados</h4>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <div className="flex items-start gap-2">
+                      <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20 shrink-0">x = 0</Badge>
+                      <p>Intersección con el plano YZ (línea roja). Muestra el perfil de la función cuando x es cero.</p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Badge variant="outline" className="bg-teal-500/10 text-teal-500 border-teal-500/20 shrink-0">y = 0</Badge>
+                      <p>Intersección con el plano XZ (línea turquesa). Muestra el perfil de la función cuando y es cero.</p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20 shrink-0">z = 0</Badge>
+                      <p>Intersección con el plano XY (línea verde). Puntos donde la función toca el plano base.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2 text-sm">Curvas de Nivel</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Las líneas de colores sobre la superficie representan curvas donde la función mantiene un valor constante. 
+                    Son útiles para visualizar cómo cambia la pendiente y encontrar máximos, mínimos o puntos de silla.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2 text-sm">Interpretación Geométrica</h4>
+                  <p className="text-sm text-muted-foreground">
+                    La superficie coloreada muestra los valores de z = f(x,y). Los colores van del azul (valores bajos) 
+                    al rojo (valores altos), ayudando a identificar regiones de la función.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -3,6 +3,8 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Grid, Line, Text } from "@react-three/drei";
 import * as THREE from "three";
 import { QuadricSurface3D } from "./QuadricSurface3D";
+import { ContourLines } from "./ContourLines";
+import { PlaneIntersections } from "./PlaneIntersections";
 
 type VisualizationType = "surface" | "parametric" | "contour" | "vector-field" | "implicit" | "quadric";
 
@@ -15,15 +17,32 @@ interface Plot3DCanvasProps {
   visualizationType?: VisualizationType;
 }
 
-function ParametricCurve({ formula, tRange = [0, 6.28], resolution = 100 }: { formula: string; tRange?: [number, number]; resolution?: number }) {
-  const [xFunc, yFunc, zFunc] = formula.split("|");
+function ParametricCurve({ formula, tRange = [0, 6.28], resolution = 200 }: { formula: string; tRange?: [number, number]; resolution?: number }) {
+  // Parse parametric format: could be "cos(t)|sin(t)|t" or "(cos(t), sin(t), t)"
+  let xFunc, yFunc, zFunc;
+  
+  if (formula.includes("|")) {
+    [xFunc, yFunc, zFunc] = formula.split("|");
+  } else {
+    // Handle format like "(cos(t), sin(t), t)"
+    const cleaned = formula.replace(/[()]/g, '').trim();
+    [xFunc, yFunc, zFunc] = cleaned.split(',').map(f => f.trim());
+  }
+
   const points: THREE.Vector3[] = [];
 
   const evaluateParam = (func: string, t: number): number => {
     try {
-      const f = func.replace(/t/g, `(${t})`).replace(/\^/g, "**");
-      return eval(f);
-    } catch {
+      let evalFunc = func
+        .replace(/cos/g, 'Math.cos')
+        .replace(/sin/g, 'Math.sin')
+        .replace(/tan/g, 'Math.tan')
+        .replace(/t/g, `(${t})`)
+        .replace(/\^/g, '**')
+        .replace(/Math\.Math\./g, 'Math.');
+      return eval(evalFunc);
+    } catch (e) {
+      console.error('Error evaluating:', func, e);
       return 0;
     }
   };
@@ -36,16 +55,18 @@ function ParametricCurve({ formula, tRange = [0, 6.28], resolution = 100 }: { fo
     const x = evaluateParam(xFunc, t);
     const y = evaluateParam(yFunc, t);
     const z = evaluateParam(zFunc, t);
-    points.push(new THREE.Vector3(x, y, z));
+    if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
+      points.push(new THREE.Vector3(x, y, z));
+    }
   }
 
-  return (
+  return points.length > 0 ? (
     <Line
       points={points}
       color="#ff0066"
       lineWidth={3}
     />
-  );
+  ) : null;
 }
 
 function Surface({ formula, xRange, yRange, resolution = 50, visualizationType = "surface" }: Plot3DCanvasProps) {
@@ -62,15 +83,22 @@ function Surface({ formula, xRange, yRange, resolution = 50, visualizationType =
   const xStep = (xMax - xMin) / resolution;
   const yStep = (yMax - yMin) / resolution;
 
-  // Function parser (simplified - in production use math.js or similar)
+  // Function parser with better math support
   const evaluateZ = (x: number, y: number): number => {
     try {
-      // Simple evaluation - replace with proper parser in production
       const func = formula
         .replace(/\^/g, "**")
+        .replace(/sqrt/g, 'Math.sqrt')
+        .replace(/sin/g, 'Math.sin')
+        .replace(/cos/g, 'Math.cos')
+        .replace(/tan/g, 'Math.tan')
+        .replace(/log/g, 'Math.log')
+        .replace(/exp/g, 'Math.exp')
         .replace(/x/g, `(${x})`)
-        .replace(/y/g, `(${y})`);
-      return eval(func);
+        .replace(/y/g, `(${y})`)
+        .replace(/Math\.Math\./g, 'Math.');
+      const result = eval(func);
+      return isNaN(result) || !isFinite(result) ? 0 : result;
     } catch {
       return 0;
     }
@@ -198,7 +226,19 @@ export const Plot3DCanvas = (props: Plot3DCanvasProps) => {
             showBothSides={true}
           />
         ) : (
-          <Surface {...props} />
+          <>
+            <Surface {...props} />
+            <PlaneIntersections 
+              formula={props.formula}
+              xRange={props.xRange}
+              yRange={props.yRange}
+            />
+            <ContourLines 
+              formula={props.formula}
+              xRange={props.xRange}
+              yRange={props.yRange}
+            />
+          </>
         )}
         
         <Grid
