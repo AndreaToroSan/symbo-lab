@@ -16,7 +16,6 @@ const Optimization = () => {
   const [criticalPoints, setCriticalPoints] = useState<string | null>(null);
   const [classification, setClassification] = useState<string | null>(null);
   const [lagrangeResult, setLagrangeResult] = useState<any>(null);
-  const [explanation, setExplanation] = useState<string | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const mathInputRef = useRef<MathInputRef>(null);
   const constraintInputRef = useRef<MathInputRef>(null);
@@ -27,7 +26,6 @@ const Optimization = () => {
     setCriticalPoints(null);
     setClassification(null);
     setLagrangeResult(null);
-    setExplanation(null);
     
     try {
       const body: any = { 
@@ -54,7 +52,6 @@ const Optimization = () => {
       } else {
         if (useConstraint) {
           setLagrangeResult(data);
-          setExplanation(data.explanation);
           toast({
             title: "Cálculo completado",
             description: "Optimización con restricciones completada"
@@ -62,7 +59,6 @@ const Optimization = () => {
         } else {
           setCriticalPoints(data.criticalPoints);
           setClassification(data.classification);
-          setExplanation(data.explanation);
           toast({
             title: "Cálculo completado",
             description: "Puntos críticos encontrados exitosamente"
@@ -141,17 +137,6 @@ const Optimization = () => {
         </Card>
 
         <div className="space-y-6">
-          {explanation && (
-            <Card>
-              <CardHeader>
-                <CardTitle>¿Qué significa este resultado?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-foreground whitespace-pre-line leading-relaxed">{explanation}</p>
-              </CardContent>
-            </Card>
-          )}
-
           {criticalPoints && (
             <Card>
               <CardHeader>
@@ -205,7 +190,7 @@ const Optimization = () => {
             </>
           )}
 
-          {!criticalPoints && !classification && !lagrangeResult && !explanation && (
+          {!criticalPoints && !classification && !lagrangeResult && (
             <Card>
               <CardHeader>
                 <CardTitle>Resultados</CardTitle>
