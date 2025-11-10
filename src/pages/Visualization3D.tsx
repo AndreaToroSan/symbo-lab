@@ -112,34 +112,129 @@ const Visualization3D = () => {
             Tipos de Visualización Automática
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3 text-sm">
-          <div className="space-y-2">
+        <CardContent className="space-y-4 text-sm">
+          <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Badge variant="outline">Superficie</Badge>
-              <span>z = f(x,y), ejemplo:</span>
+              <span>z = f(x,y)</span>
             </div>
-            <MathDisplay math="x^2 + y^2" displayMode={false} />
+            <div className="grid grid-cols-1 gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="justify-start h-auto py-2 px-3"
+                onClick={() => setFunctionLatex("x^2+y^2")}
+              >
+                <div className="text-left">
+                  <div className="font-mono text-xs">Paraboloide:</div>
+                  <MathDisplay math="x^2 + y^2" displayMode={false} />
+                </div>
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="justify-start h-auto py-2 px-3"
+                onClick={() => setFunctionLatex("\\sin(x)\\cdot\\cos(y)")}
+              >
+                <div className="text-left">
+                  <div className="font-mono text-xs">Ondulación:</div>
+                  <MathDisplay math="\sin(x)\cdot\cos(y)" displayMode={false} />
+                </div>
+              </Button>
+            </div>
           </div>
-          <div className="space-y-2">
+
+          <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Badge variant="outline">Paramétrica</Badge>
-              <span>ejemplo:</span>
+              <span>(x(t), y(t), z(t))</span>
             </div>
-            <MathDisplay math="(\cos(t), \sin(t), t)" displayMode={false} />
+            <div className="grid grid-cols-1 gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="justify-start h-auto py-2 px-3"
+                onClick={() => setFunctionLatex("(\\cos(t),\\sin(t),t)")}
+              >
+                <div className="text-left">
+                  <div className="font-mono text-xs">Hélice:</div>
+                  <MathDisplay math="(\cos(t), \sin(t), t)" displayMode={false} />
+                </div>
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="justify-start h-auto py-2 px-3"
+                onClick={() => setFunctionLatex("(\\cos(t),\\sin(t),\\sin(2t))")}
+              >
+                <div className="text-left">
+                  <div className="font-mono text-xs">Onda circular:</div>
+                  <MathDisplay math="(\cos(t), \sin(t), \sin(2t))" displayMode={false} />
+                </div>
+              </Button>
+            </div>
           </div>
-          <div className="space-y-2">
+
+          <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Badge variant="outline">Implícita</Badge>
-              <span>F(x,y,z) = c, ejemplo:</span>
+              <span>F(x,y,z) = c</span>
             </div>
-            <MathDisplay math="x^2 + y^2 + z^2 = 1" displayMode={false} />
+            <div className="grid grid-cols-1 gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="justify-start h-auto py-2 px-3"
+                onClick={() => setFunctionLatex("x^2+y^2+z^2=1")}
+              >
+                <div className="text-left">
+                  <div className="font-mono text-xs">Esfera:</div>
+                  <MathDisplay math="x^2+y^2+z^2=1" displayMode={false} />
+                </div>
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="justify-start h-auto py-2 px-3"
+                onClick={() => setFunctionLatex("x^2+y^2=1")}
+              >
+                <div className="text-left">
+                  <div className="font-mono text-xs">Cilindro:</div>
+                  <MathDisplay math="x^2+y^2=1" displayMode={false} />
+                </div>
+              </Button>
+            </div>
           </div>
-          <div className="space-y-2">
+
+          <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Badge variant="outline">Campo Vectorial</Badge>
-              <span>ejemplo:</span>
+              <span>(P(x,y), Q(x,y))</span>
             </div>
-            <MathDisplay math="(-y, x)" displayMode={false} />
+            <div className="grid grid-cols-1 gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="justify-start h-auto py-2 px-3"
+                onClick={() => setFunctionLatex("(-y,x)")}
+              >
+                <div className="text-left">
+                  <div className="font-mono text-xs">Rotacional:</div>
+                  <MathDisplay math="(-y, x)" displayMode={false} />
+                </div>
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="justify-start h-auto py-2 px-3"
+                onClick={() => setFunctionLatex("(x,y)")}
+              >
+                <div className="text-left">
+                  <div className="font-mono text-xs">Radial:</div>
+                  <MathDisplay math="(x, y)" displayMode={false} />
+                </div>
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
