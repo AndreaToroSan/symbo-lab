@@ -41,14 +41,16 @@ Devuelve un JSON con el siguiente formato:
     "b": valor o null,
     "c": valor o null
   },
-  "description": "descripción detallada de la superficie en texto plano, sin LaTeX ni símbolos matemáticos especiales",
+  "description": "descripción detallada de la superficie en texto plano normal con espacios entre palabras, sin LaTeX ni símbolos matemáticos especiales",
   "center": "(x0, y0, z0) o null si está en el origen",
   "axes": "descripción de los ejes principales"
 }
 
 IMPORTANTE: 
 - canonical_form debe ser LaTeX puro sin símbolos $ (ejemplo: "\\frac{x^2}{a^2} + \\frac{y^2}{b^2} + \\frac{z^2}{c^2} = 1")
-- description debe ser texto plano explicativo, SIN símbolos LaTeX ni $ (ejemplo: "Es una superficie cerrada con forma ovalada que se extiende en todas las direcciones desde su centro.")
+- description debe ser texto plano explicativo con espacios correctos entre todas las palabras, SIN símbolos LaTeX ni $ (ejemplo: "Es una superficie cerrada con forma ovalada que se extiende en todas las direcciones desde su centro. Tiene tres semiejes de diferentes longitudes.")
+
+CRÍTICO: La descripción debe tener espacios normales entre cada palabra, como texto legible en español.
 
 Si la ecuación no está en forma canónica, primero conviértela y luego clasifícala.
 Sé preciso matemáticamente y verifica todos los signos.`;
