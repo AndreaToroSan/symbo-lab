@@ -144,16 +144,16 @@ const DomainLimits = () => {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-4xl font-bold mb-2 text-foreground">Domain, Range & Limits</h1>
-        <p className="text-muted-foreground">Analyze domain, range and calculate limits of multivariable functions</p>
+        <h1 className="text-4xl font-bold mb-2 text-foreground">Dominio, Rango y Límites</h1>
+        <p className="text-muted-foreground">Analiza dominio, rango y calcula límites de funciones multivariables</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Domain Analysis</CardTitle>
-              <CardDescription>Find the domain of a function</CardDescription>
+              <CardTitle>Análisis de Dominio</CardTitle>
+              <CardDescription>Encuentra el dominio de una función</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -170,51 +170,51 @@ const DomainLimits = () => {
 
               <Button onClick={handleCalculateDomain} disabled={isCalculating} className="w-full">
                 <Calculator className="mr-2 h-4 w-4" />
-                {isCalculating ? "Calculating..." : "Calculate Domain"}
+                {isCalculating ? "Calculando..." : "Calcular Dominio"}
               </Button>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Range Analysis</CardTitle>
-              <CardDescription>Find the range of a function</CardDescription>
+              <CardTitle>Análisis de Rango</CardTitle>
+              <CardDescription>Encuentra el rango de una función</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Uses the same function as Domain Analysis
+                Usa la misma función que Análisis de Dominio
               </p>
 
               <Button onClick={handleCalculateRange} disabled={isCalculating} className="w-full">
                 <Calculator className="mr-2 h-4 w-4" />
-                {isCalculating ? "Calculating..." : "Calculate Range"}
+                {isCalculating ? "Calculando..." : "Calcular Rango"}
               </Button>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Limit Calculation</CardTitle>
-              <CardDescription>Calculate limit at a point</CardDescription>
+              <CardTitle>Cálculo de Límites</CardTitle>
+              <CardDescription>Calcula el límite en un punto</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Uses the same function as Domain Analysis
+                Usa la misma función que Análisis de Dominio
               </p>
 
               <div className="space-y-2">
-                <Label htmlFor="point">Point (x,y)</Label>
+                <Label htmlFor="point">Punto (x,y)</Label>
                 <Input
                   id="point"
                   value={point}
                   onChange={(e) => setPoint(e.target.value)}
-                  placeholder="e.g., (0,0)"
+                  placeholder="ej: (0,0)"
                 />
               </div>
 
               <Button onClick={handleCalculateLimit} disabled={isCalculating} className="w-full">
                 <Calculator className="mr-2 h-4 w-4" />
-                {isCalculating ? "Calculating..." : "Calculate Limit"}
+                {isCalculating ? "Calculando..." : "Calcular Límite"}
               </Button>
             </CardContent>
           </Card>
@@ -224,7 +224,7 @@ const DomainLimits = () => {
           {domain && (
             <Card>
               <CardHeader>
-                <CardTitle>Domain</CardTitle>
+                <CardTitle>Dominio</CardTitle>
               </CardHeader>
               <CardContent>
                 <MathDisplay math={domain} />
@@ -235,7 +235,7 @@ const DomainLimits = () => {
           {range && (
             <Card>
               <CardHeader>
-                <CardTitle>Range</CardTitle>
+                <CardTitle>Rango</CardTitle>
               </CardHeader>
               <CardContent>
                 <MathDisplay math={range} />
@@ -246,7 +246,7 @@ const DomainLimits = () => {
           {limit && (
             <Card>
               <CardHeader>
-                <CardTitle>Limit</CardTitle>
+                <CardTitle>Límite</CardTitle>
               </CardHeader>
               <CardContent>
                 {limit.exists ? (
@@ -258,7 +258,7 @@ const DomainLimits = () => {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-destructive">Limit does not exist</p>
+                    <p className="text-sm font-medium text-destructive">El límite no existe</p>
                     <MathDisplay math={limit.result} />
                     {limit.note && (
                       <p className="text-sm text-muted-foreground">{limit.note}</p>
@@ -272,12 +272,12 @@ const DomainLimits = () => {
           {!domain && !range && !limit && (
             <Card>
               <CardHeader>
-                <CardTitle>Results</CardTitle>
-                <CardDescription>Results will appear here</CardDescription>
+                <CardTitle>Resultados</CardTitle>
+                <CardDescription>Los resultados aparecerán aquí</CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground text-center py-8">
-                  Calculate domain, range or limit to see results
+                  Calcula dominio, rango o límite para ver los resultados
                 </p>
               </CardContent>
             </Card>

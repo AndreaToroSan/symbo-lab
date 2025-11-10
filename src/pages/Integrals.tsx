@@ -77,15 +77,15 @@ const Integrals = () => {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-4xl font-bold mb-2 text-foreground">Multiple Integrals</h1>
-        <p className="text-muted-foreground">Calculate double and triple integrals</p>
+        <h1 className="text-4xl font-bold mb-2 text-foreground">Integrales Múltiples</h1>
+        <p className="text-muted-foreground">Calcula integrales dobles y triples</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Input Function</CardTitle>
-            <CardDescription>Enter your function and integration bounds</CardDescription>
+            <CardTitle>Función de Entrada</CardTitle>
+            <CardDescription>Ingresa tu función y límites de integración</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -101,14 +101,14 @@ const Integrals = () => {
             <MathKeyboard onInsert={(latex) => mathInputRef.current?.write(latex)} />
 
             <div className="space-y-2">
-              <Label htmlFor="integralType">Integral Type</Label>
+              <Label htmlFor="integralType">Tipo de Integral</Label>
               <Select value={integralType} onValueChange={(value: "double" | "triple") => setIntegralType(value)}>
                 <SelectTrigger id="integralType">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="double">Double Integral (∬)</SelectItem>
-                  <SelectItem value="triple">Triple Integral (∭)</SelectItem>
+                  <SelectItem value="double">Integral Doble (∬)</SelectItem>
+                  <SelectItem value="triple">Integral Triple (∭)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -176,7 +176,7 @@ const Integrals = () => {
 
             <Button onClick={handleCalculate} disabled={isCalculating} className="w-full">
               <Calculator className="mr-2 h-4 w-4" />
-              {isCalculating ? "Calculating..." : "Calculate Integral"}
+              {isCalculating ? "Calculando..." : "Calcular Integral"}
             </Button>
           </CardContent>
         </Card>

@@ -16,12 +16,12 @@ import {
 } from "@/components/ui/sidebar";
 
 const menuItems = [
-  { title: "3D Visualization", url: "/3d-visualization", icon: Box },
-  { title: "Domain & Range", url: "/domain-limits", icon: MapPin },
-  { title: "Derivatives & Gradients", url: "/derivatives", icon: TrendingUp },
-  { title: "Optimization", url: "/optimization", icon: Target },
-  { title: "Integrals", url: "/integrals", icon: Sigma },
-  { title: "Quadric Surfaces", url: "/quadric-surfaces", icon: Shapes },
+  { title: "Visualización 3D", url: "/3d-visualization", icon: Box },
+  { title: "Dominio y Rango", url: "/domain-limits", icon: MapPin },
+  { title: "Derivadas y Gradientes", url: "/derivatives", icon: TrendingUp },
+  { title: "Optimización", url: "/optimization", icon: Target },
+  { title: "Integrales", url: "/integrals", icon: Sigma },
+  { title: "Superficies Cuádricas", url: "/quadric-surfaces", icon: Shapes },
 ];
 
 export function AppSidebar() {
@@ -35,12 +35,12 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border px-4 py-3">
         <h2 className="text-lg font-bold text-sidebar-primary">MultiCalc</h2>
-        <p className="text-xs text-sidebar-foreground/60">Multivariable Calculus</p>
+        <p className="text-xs text-sidebar-foreground/60">Cálculo Multivariable</p>
       </SidebarHeader>
       
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Modules</SidebarGroupLabel>
+          <SidebarGroupLabel>Módulos</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
@@ -72,12 +72,12 @@ export function AppSidebar() {
           {theme === "light" ? (
             <>
               <Moon className="h-4 w-4" />
-              <span>Dark Mode</span>
+              <span>Modo Oscuro</span>
             </>
           ) : (
             <>
               <Sun className="h-4 w-4" />
-              <span>Light Mode</span>
+              <span>Modo Claro</span>
             </>
           )}
         </Button>

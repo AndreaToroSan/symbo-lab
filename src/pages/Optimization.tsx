@@ -80,15 +80,15 @@ const Optimization = () => {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-4xl font-bold mb-2 text-foreground">Optimization</h1>
-        <p className="text-muted-foreground">Find critical points and optimize with constraints using Lagrange Multipliers</p>
+        <h1 className="text-4xl font-bold mb-2 text-foreground">Optimización</h1>
+        <p className="text-muted-foreground">Encuentra puntos críticos y optimiza con restricciones usando Multiplicadores de Lagrange</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Input Function</CardTitle>
-            <CardDescription>Enter your function to optimize</CardDescription>
+            <CardTitle>Función de Entrada</CardTitle>
+            <CardDescription>Ingresa tu función a optimizar</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -111,18 +111,18 @@ const Optimization = () => {
                 onChange={(e) => setUseConstraint(e.target.checked)}
                 className="rounded"
               />
-              <Label htmlFor="use-constraint">Use constraint (Lagrange Multipliers)</Label>
+              <Label htmlFor="use-constraint">Usar restricción (Multiplicadores de Lagrange)</Label>
             </div>
 
             {useConstraint && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="constraint">Constraint g(x,y) = 0</Label>
+                  <Label htmlFor="constraint">Restricción g(x,y) = 0</Label>
                   <MathInput
                     ref={constraintInputRef}
                     value={constraint}
                     onChange={setConstraint}
-                    placeholder="e.g., x + y - 1"
+                    placeholder="ej: x + y - 1"
                   />
                 </div>
                 <MathKeyboard onInsert={(latex) => constraintInputRef.current?.write(latex)} />
@@ -131,7 +131,7 @@ const Optimization = () => {
 
             <Button onClick={handleCalculate} disabled={isCalculating} className="w-full">
               <Calculator className="mr-2 h-4 w-4" />
-              {isCalculating ? "Calculating..." : useConstraint ? "Optimize with Constraint" : "Find Critical Points"}
+              {isCalculating ? "Calculando..." : useConstraint ? "Optimizar con Restricción" : "Encontrar Puntos Críticos"}
             </Button>
           </CardContent>
         </Card>
@@ -140,7 +140,7 @@ const Optimization = () => {
           {criticalPoints && (
             <Card>
               <CardHeader>
-                <CardTitle>Critical Points</CardTitle>
+                <CardTitle>Puntos Críticos</CardTitle>
               </CardHeader>
               <CardContent>
                 <MathDisplay math={criticalPoints} />
@@ -151,7 +151,7 @@ const Optimization = () => {
           {classification && (
             <Card>
               <CardHeader>
-                <CardTitle>Classification</CardTitle>
+                <CardTitle>Clasificación</CardTitle>
               </CardHeader>
               <CardContent>
                 <MathDisplay math={classification} />
@@ -163,7 +163,7 @@ const Optimization = () => {
             <>
               <Card>
                 <CardHeader>
-                  <CardTitle>Lagrange System</CardTitle>
+                  <CardTitle>Sistema de Lagrange</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <MathDisplay math={lagrangeResult.system} />
@@ -171,7 +171,7 @@ const Optimization = () => {
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle>Critical Points with Constraint</CardTitle>
+                  <CardTitle>Puntos Críticos con Restricción</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <MathDisplay math={lagrangeResult.points} />
@@ -180,7 +180,7 @@ const Optimization = () => {
               {lagrangeResult.values && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Function Values</CardTitle>
+                    <CardTitle>Valores de la Función</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <MathDisplay math={lagrangeResult.values} />
@@ -193,12 +193,12 @@ const Optimization = () => {
           {!criticalPoints && !classification && !lagrangeResult && (
             <Card>
               <CardHeader>
-                <CardTitle>Results</CardTitle>
-                <CardDescription>Results will appear here</CardDescription>
+                <CardTitle>Resultados</CardTitle>
+                <CardDescription>Los resultados aparecerán aquí</CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground text-center py-8">
-                  Enter a function and click calculate to see the results
+                  Ingresa una función y haz clic en calcular para ver los resultados
                 </p>
               </CardContent>
             </Card>

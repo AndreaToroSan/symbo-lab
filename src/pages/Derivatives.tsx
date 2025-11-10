@@ -107,16 +107,16 @@ const Derivatives = () => {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-4xl font-bold mb-2 text-foreground">Derivatives & Gradients</h1>
-        <p className="text-muted-foreground">Calculate partial derivatives and gradients of multivariable functions</p>
+        <h1 className="text-4xl font-bold mb-2 text-foreground">Derivadas y Gradientes</h1>
+        <p className="text-muted-foreground">Calcula derivadas parciales y gradientes de funciones multivariables</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Partial Derivatives</CardTitle>
-              <CardDescription>Calculate ∂f/∂x or ∂f/∂y</CardDescription>
+              <CardTitle>Derivadas Parciales</CardTitle>
+              <CardDescription>Calcula ∂f/∂x o ∂f/∂y</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -131,39 +131,39 @@ const Derivatives = () => {
 
               <MathKeyboard onInsert={(latex) => mathInputRef.current?.write(latex)} />
 
-              <div className="space-y-2">
-                <Label htmlFor="variable">Differentiate with respect to</Label>
-                <Select value={variable} onValueChange={setVariable}>
-                  <SelectTrigger id="variable">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="x">x</SelectItem>
-                    <SelectItem value="y">y</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="variable">Derivar con respecto a</Label>
+                  <Select value={variable} onValueChange={setVariable}>
+                    <SelectTrigger id="variable">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="x">x</SelectItem>
+                      <SelectItem value="y">y</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <Button onClick={handleCalculate} disabled={isCalculating} className="w-full">
-                <Calculator className="mr-2 h-4 w-4" />
-                {isCalculating ? "Calculating..." : "Calculate Derivative"}
-              </Button>
+                <Button onClick={handleCalculate} disabled={isCalculating} className="w-full">
+                  <Calculator className="mr-2 h-4 w-4" />
+                  {isCalculating ? "Calculando..." : "Calcular Derivada"}
+                </Button>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Gradient Vector</CardTitle>
-              <CardDescription>Calculate ∇f at a specific point</CardDescription>
+              <CardTitle>Vector Gradiente</CardTitle>
+              <CardDescription>Calcula ∇f en un punto específico</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Uses the same function as Partial Derivatives
+                Usa la misma función que Derivadas Parciales
               </p>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="point-x">Point x</Label>
+                  <Label htmlFor="point-x">Punto x</Label>
                   <Input
                     id="point-x"
                     value={pointX}
@@ -172,7 +172,7 @@ const Derivatives = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="point-y">Point y</Label>
+                  <Label htmlFor="point-y">Punto y</Label>
                   <Input
                     id="point-y"
                     value={pointY}
@@ -184,7 +184,7 @@ const Derivatives = () => {
 
               <Button onClick={handleCalculateGradient} disabled={isCalculating} className="w-full">
                 <Calculator className="mr-2 h-4 w-4" />
-                {isCalculating ? "Calculating..." : "Calculate Gradient"}
+                {isCalculating ? "Calculando..." : "Calcular Gradiente"}
               </Button>
             </CardContent>
           </Card>
@@ -194,7 +194,7 @@ const Derivatives = () => {
           {result && (
             <Card>
               <CardHeader>
-                <CardTitle>Partial Derivative ∂f/∂{variable}</CardTitle>
+                <CardTitle>Derivada Parcial ∂f/∂{variable}</CardTitle>
               </CardHeader>
               <CardContent>
                 <MathDisplay math={result} />
@@ -205,20 +205,20 @@ const Derivatives = () => {
           {gradient && (
             <Card>
               <CardHeader>
-                <CardTitle>Gradient at ({pointX}, {pointY})</CardTitle>
+                <CardTitle>Gradiente en ({pointX}, {pointY})</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h3 className="text-sm font-medium mb-2">Gradient Vector</h3>
+                  <h3 className="text-sm font-medium mb-2">Vector Gradiente</h3>
                   <MathDisplay math={gradient.vector} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium mb-2">Magnitude</h3>
+                  <h3 className="text-sm font-medium mb-2">Magnitud</h3>
                   <MathDisplay math={gradient.magnitude} />
                 </div>
                 {gradient.direction && (
                   <div>
-                    <h3 className="text-sm font-medium mb-2">Direction of Maximum Increase</h3>
+                    <h3 className="text-sm font-medium mb-2">Dirección de Máximo Crecimiento</h3>
                     <MathDisplay math={gradient.direction} />
                   </div>
                 )}
@@ -229,12 +229,12 @@ const Derivatives = () => {
           {!result && !gradient && (
             <Card>
               <CardHeader>
-                <CardTitle>Results</CardTitle>
-                <CardDescription>Results will appear here</CardDescription>
+                <CardTitle>Resultados</CardTitle>
+                <CardDescription>Los resultados aparecerán aquí</CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground text-center py-8">
-                  Calculate a derivative or gradient to see results
+                  Calcula una derivada o gradiente para ver los resultados
                 </p>
               </CardContent>
             </Card>
