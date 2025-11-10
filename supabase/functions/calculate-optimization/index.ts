@@ -22,40 +22,68 @@ serve(async (req) => {
     let systemPrompt, userPrompt;
 
     if (operation === 'lagrange') {
-      systemPrompt = `Eres un experto en cálculo multivariable y optimización con restricciones usando Multiplicadores de Lagrange. Responde ÚNICAMENTE con un objeto JSON con este formato exacto:
+      systemPrompt = `Eres un profesor experto en cálculo multivariable que enseña optimización con restricciones.
+Tu tarea es resolver problemas usando Multiplicadores de Lagrange Y EXPLICAR el significado de los resultados de forma educativa.
 
+MÉTODO DE MULTIPLICADORES DE LAGRANGE:
+1. Dado: Optimizar f(x,y) sujeto a la restricción g(x,y) = 0
+2. Principio: Los gradientes de f y g son paralelos en el óptimo: ∇f = λ∇g
+3. Sistema a resolver:
+   - fx = λ·gx  (derivada parcial de f respecto a x = λ × derivada parcial de g respecto a x)
+   - fy = λ·gy  (derivada parcial de f respecto a y = λ × derivada parcial de g respecto a y)
+   - g(x,y) = 0 (la restricción)
+
+Responde ÚNICAMENTE con un objeto JSON con este formato:
 {
-  "system": "expresión LaTeX del sistema de ecuaciones de Lagrange: \\nabla f = \\lambda \\nabla g y g = 0",
-  "points": "expresión LaTeX de los puntos críticos encontrados",
-  "values": "expresión LaTeX de los valores de f en cada punto crítico (para identificar máximos y mínimos)"
+  "system": "sistema de ecuaciones de Lagrange en LaTeX (sin $)",
+  "points": "puntos críticos encontrados en LaTeX (sin $)",
+  "values": "valores de f en cada punto en LaTeX (sin $)",
+  "explanation": "explicación detallada en español: explica qué son los puntos críticos encontrados, cuál da el valor máximo y cuál el mínimo de la función sobre la restricción, y el significado práctico de estos resultados"
 }
 
-Reglas:
-1. Plantea el sistema ∇f = λ∇g y g(x,y) = 0
-2. Resuelve el sistema para encontrar los puntos críticos
-3. Evalúa f en cada punto para determinar cuál es máximo y mínimo
-4. Usa notación LaTeX estándar
-5. NO uses símbolos $ en tu respuesta (no uses $, escribe LaTeX directo)
-6. Responde SOLO con el JSON, sin texto adicional`;
+IMPORTANTE: 
+- NO uses símbolos $ 
+- La explicación debe ser clara y educativa, mencionando si son máximos o mínimos condicionados
+- Usa la terminología: máximo/mínimo condicionado, restricción, curva de nivel`;
 
-      userPrompt = `Optimiza ${functionText} sujeto a la restricción ${constraint} = 0 usando Multiplicadores de Lagrange`;
+      userPrompt = `Resuelve usando Multiplicadores de Lagrange:
+Función objetivo: f(x,y) = ${functionText}
+Restricción: g(x,y) = ${constraint} = 0
+
+Aplica el método, encuentra los puntos críticos sobre la restricción, evalúa f en esos puntos, y explica el significado.`;
     } else {
-      systemPrompt = `Eres un experto en cálculo multivariable y optimización. Tu tarea es encontrar y clasificar puntos críticos de funciones multivariables. Responde ÚNICAMENTE con un objeto JSON con este formato exacto:
+      systemPrompt = `Eres un profesor experto en cálculo multivariable que enseña optimización.
+Tu tarea es encontrar y clasificar puntos críticos Y EXPLICAR el significado de los resultados de forma educativa.
 
+MÉTODO PARA ENCONTRAR PUNTOS CRÍTICOS:
+1. Calcular derivadas parciales: fx(x,y) y fy(x,y)
+2. Resolver el sistema fx = 0, fy = 0 para encontrar puntos críticos
+3. Clasificar usando el Hessiano (criterio de la segunda derivada):
+   - Calcular: fxx, fyy, fxy
+   - Determinante Hessiano: D = fxx·fyy - (fxy)²
+   
+CLASIFICACIÓN:
+- Si D > 0 y fxx > 0: MÍNIMO LOCAL (la función tiene su valor más bajo en una vecindad)
+- Si D > 0 y fxx < 0: MÁXIMO LOCAL (la función tiene su valor más alto en una vecindad)
+- Si D < 0: PUNTO DE SILLA (no es ni máximo ni mínimo)
+- Si D = 0: PRUEBA INCONCLUSA
+
+Responde ÚNICAMENTE con un objeto JSON con este formato:
 {
-  "criticalPoints": "expresión LaTeX de los puntos críticos, ej: (1, 2), (0, 0)",
-  "classification": "expresión LaTeX con la clasificación usando el criterio de la segunda derivada (Hessiano), ej: \\text{Mínimo local en } (1, 2) \\text{ y punto silla en } (0, 0)"
+  "criticalPoints": "lista de puntos críticos en LaTeX (sin $)",
+  "classification": "clasificación detallada mostrando D, fxx, y la conclusión en LaTeX (sin $)",
+  "explanation": "explicación en español del significado: qué representan estos puntos, si son máximos locales, mínimos locales o puntos de silla, qué significa esto en la práctica"
 }
 
-Reglas:
-1. Calcula las derivadas parciales y encuentra donde ambas son cero
-2. Evalúa el Hessiano (matriz de segundas derivadas) en cada punto crítico
-3. Clasifica cada punto: mínimo local (D>0, fxx>0), máximo local (D>0, fxx<0), punto silla (D<0), o indeterminado (D=0)
-4. Usa notación LaTeX estándar
-5. NO uses símbolos $ en tu respuesta (no uses $, escribe LaTeX directo)
-6. Responde SOLO con el JSON, sin texto adicional`;
+IMPORTANTE: 
+- NO uses símbolos $
+- Muestra el cálculo del Hessiano D para cada punto
+- Usa la terminología correcta: punto crítico, gradiente, Hessiano, mínimo/máximo local, punto de silla`;
 
-      userPrompt = `Encuentra y clasifica los puntos críticos de: ${functionText}`;
+      userPrompt = `Encuentra y clasifica los puntos críticos de:
+f(x,y) = ${functionText}
+
+Calcula derivadas parciales, resuelve fx=0 y fy=0, encuentra puntos críticos, calcula el Hessiano para clasificarlos, y explica el significado.`;
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -106,12 +134,14 @@ Reglas:
         result = {
           system: parsed.system?.replace(/\$/g, '') || "\\text{Error}",
           points: parsed.points?.replace(/\$/g, '') || "\\text{Error}",
-          values: parsed.values?.replace(/\$/g, '') || ""
+          values: parsed.values?.replace(/\$/g, '') || "",
+          explanation: parsed.explanation?.replace(/\$/g, '') || ""
         };
       } else {
         result = {
           criticalPoints: parsed.criticalPoints?.replace(/\$/g, '') || "\\text{Error}",
-          classification: parsed.classification?.replace(/\$/g, '') || "\\text{Error}"
+          classification: parsed.classification?.replace(/\$/g, '') || "\\text{Error}",
+          explanation: parsed.explanation?.replace(/\$/g, '') || ""
         };
       }
     } catch (e) {
