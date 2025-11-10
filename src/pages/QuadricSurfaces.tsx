@@ -104,31 +104,35 @@ const QuadricSurfaces = () => {
     
     // Use actual parameters if available
     const a = parameters.a || 2;
-    const b = parameters.b || 3;
-    const c = parameters.c || 1;
+    const b = parameters.b || 2;
+    const c = parameters.c || 2;
     
-    if (typeL.includes("elipsoide")) {
-      // Ellipsoid: solve for z from (x²/a²) + (y²/b²) + (z²/c²) = 1
-      // z² = c²(1 - x²/a² - y²/b²)
-      return `(${c}**2 * (1 - (x**2)/(${a}**2) - (y**2)/(${b}**2)))**0.5`;
+    if (typeL.includes("elipsoide") || typeL.includes("esfera")) {
+      // Ellipsoid/Sphere: (x²/a²) + (y²/b²) + (z²/c²) = 1
+      // z = ±c * sqrt(1 - x²/a² - y²/b²)
+      return `${c} * (1 - (x**2)/(${a}**2) - (y**2)/(${b}**2))**0.5`;
     } else if (typeL.includes("hiperboloide de una hoja")) {
       // Hyperboloid of one sheet: (x²/a²) + (y²/b²) - (z²/c²) = 1
-      return `(${c}**2 * ((x**2)/(${a}**2) + (y**2)/(${b}**2) - 1))**0.5`;
+      // z = ±c * sqrt(x²/a² + y²/b² - 1)
+      return `${c} * ((x**2)/(${a}**2) + (y**2)/(${b}**2) - 1)**0.5`;
     } else if (typeL.includes("hiperboloide de dos hojas")) {
-      // Hyperboloid of two sheets
-      return `(${c}**2 * ((x**2)/(${a}**2) - (y**2)/(${b}**2) - 1))**0.5`;
-    } else if (typeL.includes("paraboloide elíptico")) {
-      // Elliptic paraboloid: z = x²/a² + y²/b²
+      // Hyperboloid of two sheets: (z²/c²) - (x²/a²) - (y²/b²) = 1
+      // z = ±c * sqrt(1 + x²/a² + y²/b²)
+      return `${c} * (1 + (x**2)/(${a}**2) + (y**2)/(${b}**2))**0.5`;
+    } else if (typeL.includes("paraboloide elíptico") || typeL.includes("paraboloide el")) {
+      // Elliptic paraboloid: z = (x²/a²) + (y²/b²)
       return `(x**2)/(${a}**2) + (y**2)/(${b}**2)`;
     } else if (typeL.includes("paraboloide hiperbólico") || typeL.includes("silla")) {
-      // Hyperbolic paraboloid: z = x²/a² - y²/b²
+      // Hyperbolic paraboloid: z = (x²/a²) - (y²/b²)
       return `(x**2)/(${a}**2) - (y**2)/(${b}**2)`;
     } else if (typeL.includes("cono")) {
-      // Cone: z² = x²/a² + y²/b²
+      // Cone: z² = (x²/a²) + (y²/b²)
+      // z = ±sqrt(x²/a² + y²/b²)
       return `((x**2)/(${a}**2) + (y**2)/(${b}**2))**0.5`;
     } else if (typeL.includes("cilindro")) {
       // Cylinder: x²/a² + y²/b² = 1
-      return `(${c} * ((x**2)/(${a}**2) + (y**2)/(${b}**2)))**0.5`;
+      // For visualization, create a cylindrical surface
+      return `${c} * (1 - ((x**2)/(${a}**2) + (y**2)/(${b}**2) - 1)**2)**0.5`;
     }
     
     return "x**2 + y**2";

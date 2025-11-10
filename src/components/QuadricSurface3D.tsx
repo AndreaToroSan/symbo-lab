@@ -16,24 +16,25 @@ export function QuadricSurface3D({
   resolution = 50,
   showBothSides = true 
 }: QuadricSurface3DProps) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const meshRef2 = useRef<THREE.Mesh>(null);
+  const meshRefUpper = useRef<THREE.Mesh>(null);
+  const meshRefLower = useRef<THREE.Mesh>(null);
 
   // Create surface geometry
-  const geometry = new THREE.BufferGeometry();
-  const geometry2 = new THREE.BufferGeometry();
-  const vertices: number[] = [];
-  const vertices2: number[] = [];
-  const indices: number[] = [];
-  const colors: number[] = [];
-  const colors2: number[] = [];
+  const geometryUpper = new THREE.BufferGeometry();
+  const geometryLower = new THREE.BufferGeometry();
+  const verticesUpper: number[] = [];
+  const verticesLower: number[] = [];
+  const indicesUpper: number[] = [];
+  const indicesLower: number[] = [];
+  const colorsUpper: number[] = [];
+  const colorsLower: number[] = [];
 
   const [xMin, xMax] = xRange;
   const [yMin, yMax] = yRange;
   const xStep = (xMax - xMin) / resolution;
   const yStep = (yMax - yMin) / resolution;
 
-  const evaluateZ = (x: number, y: number): number => {
+  const evaluateZ = (x: number, y: number): { upper: number; lower: number } => {
     try {
       const func = formula
         .replace(/\*\*/g, "^")
@@ -45,12 +46,14 @@ export function QuadricSurface3D({
       
       // Check if result is valid
       if (isNaN(result) || !isFinite(result)) {
-        return NaN;
+        return { upper: NaN, lower: NaN };
       }
       
-      return result;
+      // For surfaces with ± solutions, return both
+      // If showBothSides is true, create symmetric surface
+      return { upper: result, lower: showBothSides ? -result : NaN };
     } catch {
-      return NaN;
+      return { upper: NaN, lower: NaN };
     }
   };
 
@@ -58,46 +61,58 @@ export function QuadricSurface3D({
   let maxZ = -Infinity;
   let hasValidPoints = false;
 
-  // Generate vertices for upper surface
+  // Generate vertices for both surfaces
   for (let i = 0; i <= resolution; i++) {
     for (let j = 0; j <= resolution; j++) {
       const x = xMin + i * xStep;
       const y = yMin + j * yStep;
-      const z = evaluateZ(x, y);
+      const { upper, lower } = evaluateZ(x, y);
       
-      if (!isNaN(z) && isFinite(z)) {
-        vertices.push(x, y, z);
-        minZ = Math.min(minZ, z);
-        maxZ = Math.max(maxZ, z);
+      // Upper surface
+      if (!isNaN(upper) && isFinite(upper)) {
+        verticesUpper.push(x, y, upper);
+        minZ = Math.min(minZ, upper);
+        maxZ = Math.max(maxZ, upper);
         hasValidPoints = true;
-        
-        // Lower surface (negative z)
-        if (showBothSides && z > 0) {
-          vertices2.push(x, y, -z);
-        }
       } else {
-        vertices.push(x, y, 0);
-        if (showBothSides) {
-          vertices2.push(x, y, 0);
+        verticesUpper.push(x, y, 0);
+      }
+      
+      // Lower surface
+      if (showBothSides) {
+        if (!isNaN(lower) && isFinite(lower)) {
+          verticesLower.push(x, y, lower);
+          minZ = Math.min(minZ, lower);
+          maxZ = Math.max(maxZ, lower);
+          hasValidPoints = true;
+        } else {
+          verticesLower.push(x, y, 0);
         }
       }
     }
   }
 
-  // Generate colors based on height
-  for (let i = 0; i < vertices.length; i += 3) {
-    const z = vertices[i + 2];
+  // Generate colors based on height for upper surface
+  for (let i = 0; i < verticesUpper.length; i += 3) {
+    const z = verticesUpper[i + 2];
     const normalized = hasValidPoints ? (z - minZ) / (maxZ - minZ || 1) : 0.5;
     
     // Blue to red gradient
-    colors.push(normalized, 0.3, 1 - normalized);
-    
-    if (showBothSides && i < vertices2.length) {
-      colors2.push(normalized, 0.3, 1 - normalized);
+    colorsUpper.push(normalized, 0.3, 1 - normalized);
+  }
+  
+  // Generate colors for lower surface
+  if (showBothSides) {
+    for (let i = 0; i < verticesLower.length; i += 3) {
+      const z = verticesLower[i + 2];
+      const normalized = hasValidPoints ? (z - minZ) / (maxZ - minZ || 1) : 0.5;
+      
+      // Blue to red gradient
+      colorsLower.push(normalized, 0.3, 1 - normalized);
     }
   }
 
-  // Generate indices for triangles
+  // Generate indices for triangles - upper surface
   for (let i = 0; i < resolution; i++) {
     for (let j = 0; j < resolution; j++) {
       const a = i * (resolution + 1) + j;
@@ -105,41 +120,66 @@ export function QuadricSurface3D({
       const c = a + (resolution + 1);
       const d = c + 1;
 
-      // Check if all vertices are valid
-      const aValid = !isNaN(vertices[a * 3 + 2]) && isFinite(vertices[a * 3 + 2]);
-      const bValid = !isNaN(vertices[b * 3 + 2]) && isFinite(vertices[b * 3 + 2]);
-      const cValid = !isNaN(vertices[c * 3 + 2]) && isFinite(vertices[c * 3 + 2]);
-      const dValid = !isNaN(vertices[d * 3 + 2]) && isFinite(vertices[d * 3 + 2]);
+      // Check if all vertices are valid for upper surface
+      const aValid = !isNaN(verticesUpper[a * 3 + 2]) && isFinite(verticesUpper[a * 3 + 2]);
+      const bValid = !isNaN(verticesUpper[b * 3 + 2]) && isFinite(verticesUpper[b * 3 + 2]);
+      const cValid = !isNaN(verticesUpper[c * 3 + 2]) && isFinite(verticesUpper[c * 3 + 2]);
+      const dValid = !isNaN(verticesUpper[d * 3 + 2]) && isFinite(verticesUpper[d * 3 + 2]);
 
       if (aValid && bValid && cValid) {
-        indices.push(a, b, c);
+        indicesUpper.push(a, b, c);
       }
       if (bValid && dValid && cValid) {
-        indices.push(b, d, c);
+        indicesUpper.push(b, d, c);
+      }
+    }
+  }
+  
+  // Generate indices for triangles - lower surface
+  if (showBothSides) {
+    for (let i = 0; i < resolution; i++) {
+      for (let j = 0; j < resolution; j++) {
+        const a = i * (resolution + 1) + j;
+        const b = a + 1;
+        const c = a + (resolution + 1);
+        const d = c + 1;
+
+        // Check if all vertices are valid for lower surface
+        const aValid = !isNaN(verticesLower[a * 3 + 2]) && isFinite(verticesLower[a * 3 + 2]);
+        const bValid = !isNaN(verticesLower[b * 3 + 2]) && isFinite(verticesLower[b * 3 + 2]);
+        const cValid = !isNaN(verticesLower[c * 3 + 2]) && isFinite(verticesLower[c * 3 + 2]);
+        const dValid = !isNaN(verticesLower[d * 3 + 2]) && isFinite(verticesLower[d * 3 + 2]);
+
+        if (aValid && bValid && cValid) {
+          indicesLower.push(a, b, c);
+        }
+        if (bValid && dValid && cValid) {
+          indicesLower.push(b, d, c);
+        }
       }
     }
   }
 
-  geometry.setIndex(indices);
-  geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
-  geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
-  geometry.computeVertexNormals();
+  geometryUpper.setIndex(indicesUpper);
+  geometryUpper.setAttribute("position", new THREE.Float32BufferAttribute(verticesUpper, 3));
+  geometryUpper.setAttribute("color", new THREE.Float32BufferAttribute(colorsUpper, 3));
+  geometryUpper.computeVertexNormals();
 
-  if (showBothSides && vertices2.length > 0) {
-    geometry2.setIndex(indices);
-    geometry2.setAttribute("position", new THREE.Float32BufferAttribute(vertices2, 3));
-    geometry2.setAttribute("color", new THREE.Float32BufferAttribute(colors2, 3));
-    geometry2.computeVertexNormals();
+  if (showBothSides && verticesLower.length > 0) {
+    geometryLower.setIndex(indicesLower);
+    geometryLower.setAttribute("position", new THREE.Float32BufferAttribute(verticesLower, 3));
+    geometryLower.setAttribute("color", new THREE.Float32BufferAttribute(colorsLower, 3));
+    geometryLower.computeVertexNormals();
   }
 
   return (
     <>
-      <mesh ref={meshRef} geometry={geometry}>
+      <mesh ref={meshRefUpper} geometry={geometryUpper}>
         <meshPhongMaterial vertexColors side={THREE.DoubleSide} />
       </mesh>
-      {showBothSides && vertices2.length > 0 && (
-        <mesh ref={meshRef2} geometry={geometry2}>
-          <meshPhongMaterial vertexColors side={THREE.DoubleSide} opacity={0.8} transparent />
+      {showBothSides && verticesLower.length > 0 && (
+        <mesh ref={meshRefLower} geometry={geometryLower}>
+          <meshPhongMaterial vertexColors side={THREE.DoubleSide} />
         </mesh>
       )}
     </>
