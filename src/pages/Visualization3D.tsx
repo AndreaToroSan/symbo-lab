@@ -230,51 +230,201 @@ const Visualization3D = () => {
             </CardContent>
           </Card>
 
-          {currentType === "surface" && (
-            <Card className="border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Info className="h-5 w-5 text-primary" />
-                  Análisis de la Función
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h4 className="font-semibold mb-2 text-sm">Intersecciones con los Planos Coordenados</h4>
-                  <div className="space-y-2 text-sm text-muted-foreground">
-                    <div className="flex items-start gap-2">
-                      <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20 shrink-0">x = 0</Badge>
-                      <p>Intersección con el plano YZ (línea roja). Muestra el perfil de la función cuando x es cero.</p>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <Badge variant="outline" className="bg-teal-500/10 text-teal-500 border-teal-500/20 shrink-0">y = 0</Badge>
-                      <p>Intersección con el plano XZ (línea turquesa). Muestra el perfil de la función cuando y es cero.</p>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20 shrink-0">z = 0</Badge>
-                      <p>Intersección con el plano XY (línea verde). Puntos donde la función toca el plano base.</p>
+          <Card className="border-primary/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Info className="h-5 w-5 text-primary" />
+                Análisis de la Función
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {currentType === "surface" && (
+                <>
+                  <div>
+                    <h4 className="font-semibold mb-2 text-sm">Intersecciones con los Planos Coordenados</h4>
+                    <div className="space-y-2 text-sm text-muted-foreground">
+                      <div className="flex items-start gap-2">
+                        <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20 shrink-0">x = 0</Badge>
+                        <p>Intersección con el plano YZ (línea roja). Muestra el perfil de la función cuando x es cero.</p>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <Badge variant="outline" className="bg-teal-500/10 text-teal-500 border-teal-500/20 shrink-0">y = 0</Badge>
+                        <p>Intersección con el plano XZ (línea turquesa). Muestra el perfil de la función cuando y es cero.</p>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20 shrink-0">z = 0</Badge>
+                        <p>Intersección con el plano XY (línea verde). Puntos donde la función toca el plano base.</p>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div>
-                  <h4 className="font-semibold mb-2 text-sm">Curvas de Nivel</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Las líneas de colores sobre la superficie representan curvas donde la función mantiene un valor constante. 
-                    Son útiles para visualizar cómo cambia la pendiente y encontrar máximos, mínimos o puntos de silla.
-                  </p>
-                </div>
+                  <div>
+                    <h4 className="font-semibold mb-2 text-sm">Curvas de Nivel</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Las líneas de colores sobre la superficie representan curvas donde la función mantiene un valor constante. 
+                      Son útiles para visualizar cómo cambia la pendiente y encontrar máximos, mínimos o puntos de silla.
+                    </p>
+                  </div>
 
-                <div>
-                  <h4 className="font-semibold mb-2 text-sm">Interpretación Geométrica</h4>
-                  <p className="text-sm text-muted-foreground">
-                    La superficie coloreada muestra los valores de z = f(x,y). Los colores van del azul (valores bajos) 
-                    al rojo (valores altos), ayudando a identificar regiones de la función.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                  <div>
+                    <h4 className="font-semibold mb-2 text-sm">Interpretación Geométrica</h4>
+                    <p className="text-sm text-muted-foreground">
+                      La superficie coloreada muestra los valores de z = f(x,y). Los colores van del azul (valores bajos) 
+                      al rojo (valores altos), ayudando a identificar regiones de la función.
+                    </p>
+                  </div>
+                </>
+              )}
+
+              {currentType === "parametric" && (
+                <>
+                  <div>
+                    <h4 className="font-semibold mb-2 text-sm">¿Qué es una Curva Paramétrica?</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Una curva paramétrica es una trayectoria en el espacio 3D definida por tres funciones que dependen 
+                      de un parámetro t: <MathDisplay math="\mathbf{r}(t) = (x(t), y(t), z(t))" displayMode={false} />
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-2 text-sm">Interpretación de la Curva (línea rosa/magenta)</h4>
+                    <p className="text-sm text-muted-foreground">
+                      La curva trazada representa el recorrido de un punto en el espacio a medida que el parámetro t varía. 
+                      Cada valor de t produce un punto único (x, y, z) en la curva. Es útil para modelar trayectorias de 
+                      objetos en movimiento, hélices, espirales y otras formas complejas.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-2 text-sm">Vector Tangente y Velocidad</h4>
+                    <p className="text-sm text-muted-foreground">
+                      La derivada <MathDisplay math="\mathbf{r}'(t) = (x'(t), y'(t), z'(t))" displayMode={false} /> 
+                      representa el vector tangente a la curva en cada punto, indicando la dirección y rapidez del movimiento 
+                      si t fuera el tiempo.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-2 text-sm">Ejemplos Comunes</h4>
+                    <div className="text-sm text-muted-foreground space-y-1">
+                      <p>• Hélice: <MathDisplay math="(\cos(t), \sin(t), t)" displayMode={false} /> - espiral ascendente</p>
+                      <p>• Círculo: <MathDisplay math="(\cos(t), \sin(t), 0)" displayMode={false} /> - círculo en el plano XY</p>
+                      <p>• Línea recta: <MathDisplay math="(t, 2t, 3t)" displayMode={false} /> - línea desde el origen</p>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {currentType === "implicit" && (
+                <>
+                  <div>
+                    <h4 className="font-semibold mb-2 text-sm">¿Qué es una Superficie Implícita?</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Una superficie implícita está definida por una ecuación de la forma F(x,y,z) = c, donde c es una 
+                      constante. A diferencia de z = f(x,y), aquí las tres variables están relacionadas implícitamente.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-2 text-sm">Conjuntos de Nivel</h4>
+                    <p className="text-sm text-muted-foreground">
+                      La superficie representa todos los puntos (x,y,z) que satisfacen la ecuación. Es un conjunto de nivel 
+                      de la función F en el valor c. Diferentes valores de c generan diferentes superficies.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-2 text-sm">Vector Normal y Gradiente</h4>
+                    <p className="text-sm text-muted-foreground">
+                      El gradiente <MathDisplay math="\nabla F = (\frac{\partial F}{\partial x}, \frac{\partial F}{\partial y}, \frac{\partial F}{\partial z})" displayMode={false} /> 
+                      es perpendicular a la superficie en cada punto, lo que es útil para calcular planos tangentes y normales.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-2 text-sm">Ejemplos Clásicos</h4>
+                    <div className="text-sm text-muted-foreground space-y-1">
+                      <p>• Esfera: <MathDisplay math="x^2 + y^2 + z^2 = 1" displayMode={false} /> - radio 1 centrada en el origen</p>
+                      <p>• Cilindro: <MathDisplay math="x^2 + y^2 = 1" displayMode={false} /> - cilindro vertical</p>
+                      <p>• Elipsoide: <MathDisplay math="\frac{x^2}{a^2} + \frac{y^2}{b^2} + \frac{z^2}{c^2} = 1" displayMode={false} /></p>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {currentType === "vector-field" && (
+                <>
+                  <div>
+                    <h4 className="font-semibold mb-2 text-sm">¿Qué es un Campo Vectorial?</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Un campo vectorial asigna un vector a cada punto del plano o espacio: 
+                      <MathDisplay math="\mathbf{F}(x,y) = (P(x,y), Q(x,y))" displayMode={false} /> 
+                      donde P y Q son funciones que determinan las componentes del vector en cada punto.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-2 text-sm">Interpretación Física</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Los vectores indican dirección y magnitud en cada punto. Puede representar flujos de fluidos, 
+                      campos de velocidades, campos de fuerza (gravitacional, eléctrico, magnético), gradientes de temperatura, etc.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-2 text-sm">Propiedades Importantes</h4>
+                    <div className="text-sm text-muted-foreground space-y-2">
+                      <p>
+                        <strong>Divergencia:</strong> <MathDisplay math="\nabla \cdot \mathbf{F} = \frac{\partial P}{\partial x} + \frac{\partial Q}{\partial y}" displayMode={false} /> 
+                        - Mide si el campo se expande o contrae en un punto (fuentes o sumideros).
+                      </p>
+                      <p>
+                        <strong>Rotacional:</strong> <MathDisplay math="\nabla \times \mathbf{F} = \frac{\partial Q}{\partial x} - \frac{\partial P}{\partial y}" displayMode={false} /> 
+                        - Mide la tendencia a rotar alrededor de un punto.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-2 text-sm">Ejemplos Comunes</h4>
+                    <div className="text-sm text-muted-foreground space-y-1">
+                      <p>• Rotacional: <MathDisplay math="(-y, x)" displayMode={false} /> - rotación antihoraria alrededor del origen</p>
+                      <p>• Radial: <MathDisplay math="(x, y)" displayMode={false} /> - vectores apuntan hacia afuera desde el origen</p>
+                      <p>• Gradiente: <MathDisplay math="(2x, 2y)" displayMode={false} /> - campo conservativo, perpendicular a nivel</p>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {currentType === "contour" && (
+                <>
+                  <div>
+                    <h4 className="font-semibold mb-2 text-sm">¿Qué son las Curvas de Nivel?</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Las curvas de nivel son las proyecciones en el plano XY de las intersecciones de la superficie 
+                      z = f(x,y) con planos horizontales z = k para diferentes valores constantes k.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-2 text-sm">Interpretación Topográfica</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Similar a las líneas en un mapa topográfico, cada curva conecta puntos de igual altura. 
+                      Curvas más juntas indican pendiente pronunciada; curvas separadas indican pendiente suave.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-2 text-sm">Gradiente y Dirección de Mayor Ascenso</h4>
+                    <p className="text-sm text-muted-foreground">
+                      El gradiente <MathDisplay math="\nabla f = (\frac{\partial f}{\partial x}, \frac{\partial f}{\partial y})" displayMode={false} /> 
+                      es siempre perpendicular a las curvas de nivel y apunta en la dirección de mayor crecimiento de f.
+                    </p>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
