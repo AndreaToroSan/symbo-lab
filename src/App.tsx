@@ -11,6 +11,7 @@ import Optimization from "./pages/Optimization";
 import Integrals from "./pages/Integrals";
 import DomainLimits from "./pages/DomainLimits";
 import QuadricSurfaces from "./pages/QuadricSurfaces";
+import Presentation from "./pages/Presentation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
               <Route path="optimization" element={<Optimization />} />
               <Route path="integrals" element={<Integrals />} />
               <Route path="domain-limits" element={<DomainLimits />} />
+              <Route path="presentation" element={<Presentation />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
