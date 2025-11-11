@@ -128,7 +128,10 @@ const QuadricSurfaces = () => {
       return `(x**2)/(${a}**2) + (y**2)/(${b}**2)`;
     } else if (typeL.includes("paraboloide hiperbólico") || typeL.includes("silla")) {
       // Hyperbolic paraboloid (saddle): z = x²/a² - y²/b²
-      return `(x**2)/(${a}**2) - (y**2)/(${b}**2)`;
+      // For proper saddle shape, use parameters if a=b=1, otherwise scale appropriately
+      const aParam = (parameters.a && parameters.a !== 2) ? parameters.a : 1;
+      const bParam = (parameters.b && parameters.b !== 2) ? parameters.b : 1;
+      return `(x**2)/(${aParam}**2) - (y**2)/(${bParam}**2)`;
     } else if (typeL.includes("cono")) {
       // Cone: x²/a² + y²/b² - z²/c² = 0
       // z = ±(c/1) * sqrt(x²/a² + y²/b²)
