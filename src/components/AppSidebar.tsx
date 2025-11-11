@@ -1,4 +1,4 @@
-import { Moon, Sun, Box, TrendingUp, Target, Sigma, MapPin, Shapes, Presentation } from "lucide-react";
+import { Moon, Sun, Box, TrendingUp, Target, Sigma, MapPin, Shapes } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,6 @@ const menuItems = [
   { title: "Optimización", url: "/optimization", icon: Target },
   { title: "Integrales", url: "/integrals", icon: Sigma },
   { title: "Superficies Cuádricas", url: "/quadric-surfaces", icon: Shapes },
-  { title: "Exposición del Proyecto", url: "/presentation", icon: Presentation },
 ];
 
 export function AppSidebar() {

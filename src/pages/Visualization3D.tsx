@@ -46,18 +46,6 @@ const Visualization3D = () => {
       .replace(/\^\{([^}]+)\}/g, '**($1)')
       .replace(/\^(\w)/g, '**$1');
     
-    // Agregar multiplicación implícita entre términos
-    result = result
-      // Número seguido de variable o paréntesis: 2x → 2*x, 2(x) → 2*(x)
-      .replace(/(\d)([a-zA-Z(])/g, '$1*$2')
-      // Paréntesis cerrado seguido de número, variable o paréntesis: )x → )*x, )2 → )*2, )( → )*(
-      .replace(/(\))(\d|[a-zA-Z(])/g, '$1*$2')
-      // Variable seguida de paréntesis: x( → x*(
-      .replace(/([a-zA-Z])(\()/g, '$1*$2')
-      // Potencia seguida de variable: **2 x → **2*x
-      .replace(/(\*\*\d+)\s+([a-zA-Z])/g, '$1*$2')
-      .replace(/(\*\*\([^)]+\))\s+([a-zA-Z])/g, '$1*$2');
-    
     return result;
   };
 
