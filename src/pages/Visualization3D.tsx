@@ -37,10 +37,14 @@ const Visualization3D = () => {
       .replace(/\\sqrt\{([^}]+)\}/g, 'sqrt($1)')
       .replace(/\\pi/g, 'Math.PI')
       .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '(($1)/($2))')
-      .replace(/\^(\d)/g, '**$1')
-      .replace(/\^\{([^}]+)\}/g, '**($1)')
       .replace(/\s+/g, ' ')
       .trim();
+    
+    // Convertir potencias después de procesar fracciones
+    result = result
+      .replace(/\^(\d+)/g, '**$1')
+      .replace(/\^\{([^}]+)\}/g, '**($1)')
+      .replace(/\^(\w)/g, '**$1');
     
     return result;
   };
@@ -49,6 +53,13 @@ const Visualization3D = () => {
   const convertImplicitToExplicit = (latex: string): string => {
     const normalized = latex.toLowerCase().replace(/\s+/g, '');
     
+    // Detectar elipsoide con fracciones: ((x**2)/(4))+((y**2)/(9))+((z**2)/(16))=1
+    const ellipsoidFracMatch = normalized.match(/\(\(x\*\*2\)\/\((\d+)\)\)\+\(\(y\*\*2\)\/\((\d+)\)\)\+\(\(z\*\*2\)\/\((\d+)\)\)=1/);
+    if (ellipsoidFracMatch) {
+      const [, a2, b2, c2] = ellipsoidFracMatch;
+      return `Math.sqrt(${c2} * (1 - x**2/${a2} - y**2/${b2}))`;
+    }
+    
     // Detectar esfera: x^2+y^2+z^2=r^2 -> z = sqrt(r^2 - x^2 - y^2)
     const sphereMatch = normalized.match(/x\*\*2\+y\*\*2\+z\*\*2=(\d+)/);
     if (sphereMatch) {
@@ -56,14 +67,14 @@ const Visualization3D = () => {
       return `Math.sqrt(${r2} - x**2 - y**2)`;
     }
     
-    // Detectar cilindro: x^2+y^2=r^2 -> z = 0 (plano extruido)
+    // Detectar cilindro: x^2+y^2=r^2
     const cylinderMatch = normalized.match(/x\*\*2\+y\*\*2=(\d+)/);
     if (cylinderMatch) {
       const r2 = cylinderMatch[1];
       return `Math.sqrt(${r2} - x**2 - y**2)`;
     }
     
-    // Detectar elipsoide: x^2/a^2 + y^2/b^2 + z^2/c^2 = 1
+    // Detectar elipsoide sin fracciones: x**2/a + y**2/b + z**2/c = 1
     const ellipsoidMatch = normalized.match(/x\*\*2\/(\d+)\+y\*\*2\/(\d+)\+z\*\*2\/(\d+)=1/);
     if (ellipsoidMatch) {
       const [, a2, b2, c2] = ellipsoidMatch;
@@ -78,20 +89,20 @@ const Visualization3D = () => {
   const detectVisualizationType = (latex: string): VisualizationType => {
     const normalized = latex.toLowerCase().replace(/\s+/g, '');
     
-    // Detectar paramétrica: x(t), y(t), z(t) o formato (cos(t), sin(t), t)
-    if (normalized.includes('(t)') || 
-        (normalized.includes('cos') && normalized.includes('sin') && normalized.includes('t'))) {
+    // Detectar paramétrica: formato (cos(t), sin(t), t) o similares
+    if (normalized.match(/\([^,)]+,[^,)]+,[^,)]+\)/) && normalized.includes('t')) {
       return "parametric";
     }
     
-    // Detectar implícita: tiene x, y, z y un signo igual
-    if (normalized.includes('x') && normalized.includes('y') && normalized.includes('z') && 
-        (normalized.includes('=0') || normalized.includes('=1'))) {
+    // Detectar implícita: tiene x, y, z y un signo igual, o tiene frac con x, y, z
+    if ((normalized.includes('x') && normalized.includes('y') && normalized.includes('z') && 
+        (normalized.includes('=0') || normalized.includes('=1'))) ||
+        (normalized.includes('\\frac') && normalized.includes('x') && normalized.includes('y') && normalized.includes('z'))) {
       return "implicit";
     }
     
-    // Detectar campo vectorial: formato vectorial (-y, x) o similar
-    if (normalized.match(/\(-?[xy],\s*-?[xy]\)/)) {
+    // Detectar campo vectorial: formato vectorial (-y, x) o similar (sin t)
+    if (normalized.match(/\(-?[xy],\s*-?[xy]\)/) && !normalized.includes('t')) {
       return "vector-field";
     }
     

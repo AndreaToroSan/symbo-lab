@@ -25,7 +25,7 @@ function ParametricCurve({ formula, tRange = [0, 6.28], resolution = 200 }: { fo
     [xFunc, yFunc, zFunc] = formula.split("|");
   } else {
     // Handle format like "(cos(t), sin(t), t)"
-    const cleaned = formula.replace(/[()]/g, '').trim();
+    const cleaned = formula.replace(/^\(|\)$/g, '').trim();
     [xFunc, yFunc, zFunc] = cleaned.split(',').map(f => f.trim());
   }
 
@@ -34,15 +34,17 @@ function ParametricCurve({ formula, tRange = [0, 6.28], resolution = 200 }: { fo
   const evaluateParam = (func: string, t: number): number => {
     try {
       let evalFunc = func
+        .replace(/\*\*/g, '^POWER^')
         .replace(/cos/g, 'Math.cos')
         .replace(/sin/g, 'Math.sin')
         .replace(/tan/g, 'Math.tan')
+        .replace(/sqrt/g, 'Math.sqrt')
+        .replace(/Math\.Math\./g, 'Math.')
         .replace(/t/g, `(${t})`)
-        .replace(/\^/g, '**')
-        .replace(/Math\.Math\./g, 'Math.');
+        .replace(/\^POWER\^/g, '**');
       return eval(evalFunc);
     } catch (e) {
-      console.error('Error evaluating:', func, e);
+      console.error('Error evaluating:', func, 'with t =', t, e);
       return 0;
     }
   };
@@ -87,16 +89,17 @@ function Surface({ formula, xRange, yRange, resolution = 50, visualizationType =
   const evaluateZ = (x: number, y: number): number => {
     try {
       const func = formula
-        .replace(/\^/g, "**")
+        .replace(/\*\*/g, '^POWER^')
         .replace(/sqrt/g, 'Math.sqrt')
         .replace(/sin/g, 'Math.sin')
         .replace(/cos/g, 'Math.cos')
         .replace(/tan/g, 'Math.tan')
         .replace(/log/g, 'Math.log')
         .replace(/exp/g, 'Math.exp')
+        .replace(/Math\.Math\./g, 'Math.')
         .replace(/x/g, `(${x})`)
         .replace(/y/g, `(${y})`)
-        .replace(/Math\.Math\./g, 'Math.');
+        .replace(/\^POWER\^/g, '**');
       const result = eval(func);
       return isNaN(result) || !isFinite(result) ? 0 : result;
     } catch {
